@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════
+   DESIGN TOKEN SYSTEM — freemoa.net
+   ════════════════════════════════════════ */
+@theme {
+  /* ── Brand ── */
+  --color-brand:       #ff7d12;
+  --color-brand-solid: #fe7c25;
+
+  /* ── Text ── */
+  --color-ink:   #262626;
+  --color-dim:   #555555;
+  --color-quiet: #666666;
+  --color-pale:  #aaaaaa;
+
+  /* ── Surface ── */
+  --color-page:    #ffffff;
+  --color-soft:    #f9f9f9;
+  --color-neutral: #f2f2f2;
+
+  /* ── Border ── */
+  --color-line:   #e8e8e8;
+  --color-subtle: #e3e3e3;
+
+  /* ── Category badges ── */
+  --color-dev:       #31d0f4;
+  --color-dev-bg:    #edfafd;
+  --color-design:    #41d89e;
+  --color-design-bg: #effaf6;
+  --color-plan-bg:   #fdf2e9;
+
+  /* ── Typography ── */
+  --font-sans: "Freesentation", "Noto Sans KR", "Lato", "Apple SD Gothic Neo", sans-serif;
+
+  /* ── Border radius ── */
+  --radius-sm:   5px;
+  --radius-md:   10px;
+  --radius-lg:   20px;
+  --radius-pill: 100px;
+
+  /* ── Shadows ── */
+  --shadow-card: rgba(0,0,0,0.1) 0px 2px 10px;
+  --shadow-cta:  rgba(0,0,0,0.2) 2px 2px 4px;
+}
+
+/* ════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p { margin: 0; }
+img, svg { display: block; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button, input, select { font: inherit; }
+
+#root {
+  min-height: 100vh;
+  padding-top: 68px; /* fixed header offset */
+}
+
+/* ════════════════════════════════════════
+   NAV-LINK — pseudo underline animation
+   (cannot be done with Tailwind utilities alone)
+   ════════════════════════════════════════ */
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 68px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  color: var(--color-quiet);
+  font-size: 16px;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--color-brand);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-link:hover { color: var(--color-ink); }
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* ════════════════════════════════════════
+   DROPDOWN — keyframe + animation
+   ════════════════════════════════════════ */
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.more-dropdown {
+  animation: dropdownFade 0.15s ease;
+}
+
+/* ════════════════════════════════════════
+   HERO — complex multi-layer gradient + marquee
+   ════════════════════════════════════════ */
+.fmh-hero {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(rgba(255,255,255,0) 85%, #ffffff 100%),
+    linear-gradient(to right, #fff5ec 0%, #fff5ec 33%, #eafbfe 100%);
+  padding: 70px 0 50px;
+  overflow: hidden;
+}
+
+/* keyword fade */
+.kw-in  { opacity: 1; transform: translateY(0); }
+.kw-out { opacity: 0; transform: translateY(10px); }
+
+/* marquee mask */
+.fmh-marquee-area {
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+@keyframes fmhSlideLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-100% / 3)); }
+}
+@keyframes fmhSlideRight {
+  from { transform: translateX(calc(-100% / 3)); }
+  to   { transform: translateX(0); }
+}
+.fmh-slide-left  { animation: fmhSlideLeft  38s linear infinite; }
+.fmh-slide-right { animation: fmhSlideRight 42s linear infinite; }
+.fmh-marquee-area:hover .fmh-marquee-inner { animation-play-state: paused; }
+
+/* ════════════════════════════════════════
+   REVIEW CARD — webkit-line-clamp (non-utility)
+   ════════════════════════════════════════ */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════
+   HORIZONTAL SCROLL ROW — scrollbar-none
+   ════════════════════════════════════════ */
+.scroll-row {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }

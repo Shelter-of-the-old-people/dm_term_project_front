@@ -1,0 +1,744 @@
+{
+  "site": {
+    "url": "https://www.freemoa.net/",
+    "lang": "ko",
+    "title": "'FIT'한 개발팀 찾는곳, 프리모아(FREEMOA)",
+    "viewport": { "width": 1440, "height": 900, "dpr": 1 },
+    "documentHeight": 5397,
+    "pages": [
+      { "id": "home", "path": "/", "title": "'FIT'한 개발팀 찾는곳, 프리모아(FREEMOA)", "depth": 0, "crawled": true },
+      { "id": "projects", "path": "/m4/s41", "title": "프로젝트", "depth": 1, "crawled": false, "reason": "linked from GNB" },
+      { "id": "partners", "path": "/m7/s71", "title": "파트너스", "depth": 1, "crawled": false, "reason": "linked from GNB" },
+      { "id": "portfolioSearch", "path": "/m7/s712", "title": "포트폴리오 검색", "depth": 1, "crawled": false, "reason": "linked from GNB" },
+      { "id": "reviews", "path": "/review/reviewList", "title": "이용후기", "depth": 1, "crawled": false, "reason": "linked from GNB" },
+      { "id": "guide", "path": "/m1/guide?tab=guide_client", "title": "이용방법", "depth": 1, "crawled": false, "reason": "linked from GNB" },
+      { "id": "search", "path": "/search", "title": "예상견적 조회", "depth": 1, "crawled": false, "reason": "secondary nav" },
+      { "id": "teamdev", "path": "/teamdev", "title": "개발자 채용", "depth": 1, "crawled": false, "reason": "secondary nav" },
+      { "id": "management", "path": "/management", "title": "유지보수", "depth": 1, "crawled": false, "reason": "secondary nav" },
+      { "id": "login", "path": "/m0/s02", "title": "로그인", "depth": 1, "crawled": false, "reason": "auth page excluded" },
+      { "id": "join", "path": "/m0/jointype", "title": "회원가입", "depth": 1, "crawled": false, "reason": "auth page excluded" },
+      { "id": "introduce", "path": "/m1/introduce1", "title": "프리모아 스토리", "depth": 1, "crawled": false, "reason": "footer link" },
+      { "id": "faq", "path": "/m2/customer_main", "title": "자주 찾는 질문", "depth": 1, "crawled": false, "reason": "footer link" },
+      { "id": "registerProject", "path": "/m4/regProject", "title": "무료 견적 의뢰", "depth": 1, "crawled": false, "reason": "primary CTA" }
+    ],
+    "externalLinks": [
+      "https://blog.naver.com/freemoa1",
+      "https://pro.freemoa.net",
+      "https://www.facebook.com/freemoa.net",
+      "http://post.naver.com/freemoa1",
+      "http://blog.naver.com/freemoa1",
+      "https://pf.kakao.com/_rUrxdxd",
+      "https://youtu.be/Dpv9wCWg5-Q"
+    ]
+  },
+
+  "designSystem": {
+    "colors": {
+      "text": {
+        "primary": "#262626",
+        "secondary": "#555555",
+        "tertiary": "#666666",
+        "muted": "#aaaaaa",
+        "inverse": "#ffffff",
+        "dark": "#000000",
+        "slate": "#424953",
+        "highContrast": "#2c2c2c"
+      },
+      "brand": {
+        "primary": "#ff7d12",
+        "primarySolid": "#fe7c25",
+        "accentCyan": "#31d0f4",
+        "accentGreen": "#41d89e",
+        "accentYellow": "#ffc53a"
+      },
+      "surface": {
+        "page": "#ffffff",
+        "subtle": "#f9f9f9",
+        "neutral": "#f2f2f2",
+        "divider": "#e8e8e8",
+        "border": "#e3e3e3",
+        "outline": "#707070",
+        "soft": "#f0f0f0",
+        "tintCyan": "#edfafd",
+        "tintPeach": "#fdf2e9",
+        "tintMint": "#effaf6"
+      },
+      "category": {
+        "dev": { "bg": "#edfafd", "fg": "#31d0f4" },
+        "design": { "bg": "#effaf6", "fg": "#41d89e" },
+        "plan": { "bg": "#fdf2e9", "fg": "#ff7d12" },
+        "highlight": { "bg": "#ffc53a", "fg": "#262626" }
+      },
+      "gradients": {
+        "heroBackdrop": "linear-gradient(to right, #fff5ec 0%, #fff5ec 33%, #eafbfe 100%)",
+        "heroFadeOverlay": "linear-gradient(rgba(255,255,255,0) 85%, #ffffff 100%)",
+        "rainbowSubtle": "linear-gradient(91deg, rgba(255,125,18,0.05) 0%, rgba(255,197,58,0.05) 29%, rgba(65,216,158,0.05) 64%, rgba(49,208,244,0.05) 100%)"
+      }
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "Freesentation, \"Noto Sans KR\", Lato-regular, sans-serif",
+        "korean": "\"Noto Sans KR\", sans-serif",
+        "icon": "FontAwesome"
+      },
+      "weights": { "thin": 100, "light": 300, "regular": 400, "medium": 500, "semibold": 600, "bold": 700, "black": 900 },
+      "scale": {
+        "displayXL":   { "size": "59px", "lineHeight": "60px", "weight": 300 },
+        "displayBold": { "size": "58px", "lineHeight": "57px", "weight": 400 },
+        "h1":          { "size": "46px", "lineHeight": "45px", "weight": 700 },
+        "h2":          { "size": "30px", "lineHeight": "44px", "weight": 700 },
+        "h3":          { "size": "23px", "lineHeight": "29px", "weight": 600 },
+        "subtitle":    { "size": "21px", "lineHeight": "31.5px", "weight": 600 },
+        "title":       { "size": "20px", "lineHeight": "30px", "weight": 600 },
+        "lead":        { "size": "19px", "lineHeight": "28.5px", "weight": 500 },
+        "label":       { "size": "18px", "lineHeight": "27px", "weight": 500 },
+        "input":       { "size": "27px", "lineHeight": "normal", "weight": 400 },
+        "body":        { "size": "16px", "lineHeight": "24px", "weight": 400 },
+        "bodySmall":   { "size": "15px", "lineHeight": "22.5px", "weight": 400 },
+        "caption":     { "size": "13px", "lineHeight": "19.5px", "weight": 400 }
+      },
+      "letterSpacing": { "default": "normal" }
+    },
+    "spacing": {
+      "tokens": {
+        "0": "0px", "1": "4px", "2": "8px", "3": "10px", "4": "12px", "5": "14px",
+        "6": "15px", "7": "16px", "8": "20px", "9": "24px", "10": "25px",
+        "12": "30px", "14": "40px", "16": "50px", "18": "60px", "22": "70px", "26": "90px", "30": "120px"
+      },
+      "sectionPaddingY": "90px",
+      "sectionInnerMaxWidth": "1320px",
+      "headerInnerMaxWidth": "1080px",
+      "headerHeight": "68px",
+      "footerHeight": "268px",
+      "commonPaddings": ["0px 10px", "0px 20px", "20px 20px 0px", "8px 12px 7px", "40px 60px", "30px 40px", "15px 25px 25px", "25px 25px 20px", "35px 40px 30px"]
+    },
+    "radius": {
+      "none": "0px",
+      "xs": "3px",
+      "sm": "5px",
+      "md": "10px",
+      "lg": "20px",
+      "pill": "100px",
+      "pillLarge": "47px",
+      "circle": "50%"
+    },
+    "shadow": {
+      "card": "rgba(0,0,0,0.1) 0px 2px 10px",
+      "ctaHover": "rgba(0,0,0,0.2) 2px 2px 4px",
+      "ring": "rgba(0,0,0,0.1) -2px 0px 2px 0px, rgba(0,0,0,0.1) 2px 0px 2px 0px, rgba(0,0,0,0.1) 0px 2px 2px 0px",
+      "focus": "rgb(0,0,0) 0px 0px 4px"
+    },
+    "borders": {
+      "default": "1px solid #e8e8e8",
+      "subtle": "1px solid #e3e3e3",
+      "strong": "1px solid #262626",
+      "brand": "1px solid #ff7d12",
+      "categoryHover": "1px solid #f27824"
+    },
+    "transitions": {
+      "fast": "all 0.2s ease-in-out",
+      "base": "all 0.3s ease-in-out",
+      "slow": "all 0.5s ease-in-out",
+      "lazy": "all 0.8s ease-in-out",
+      "transform": "transform 0.3s"
+    },
+    "zIndex": {
+      "headerFixed": 2000,
+      "overlay": 1000,
+      "modal": 3000,
+      "toast": 4000
+    },
+    "breakpoints": { "desktop": "1080px", "wide": "1320px" }
+  },
+
+  "layouts": [
+    {
+      "id": "appShell",
+      "structure": ["FixedHeader", "ContentWrap", "Footer"],
+      "headerPosition": "fixed",
+      "headerHeight": 68,
+      "contentTopOffset": 68,
+      "innerContainer": { "maxWidth": 1320, "align": "center", "justify": "center" }
+    },
+    {
+      "id": "section",
+      "pattern": "flex row justify-center, child .inner (1320px) inside",
+      "paddingY": "90px",
+      "variants": [
+        { "name": "default", "bg": "#ffffff" },
+        { "name": "gray", "bg": "#f9f9f9" },
+        { "name": "gradient", "bg": "linear-gradient(91deg, rgba(255,125,18,0.05) 0%, rgba(255,197,58,0.05) 29%, rgba(65,216,158,0.05) 64%, rgba(49,208,244,0.05) 100%)" },
+        { "name": "topHero", "bg": "linear-gradient(to right, #fff5ec 0%, #fff5ec 33%, #eafbfe 100%)", "padding": "70px 0px 50px" }
+      ]
+    },
+    {
+      "id": "sectionHeader",
+      "selector": ".contentsTitle",
+      "pattern": "flex row, justify-content: space-between, align-items: center",
+      "children": ["h2 (title, 30px/700)", "a (전체보기 / 더보기 with chevron svg)"]
+    },
+    {
+      "id": "statSplit",
+      "selector": ".mainContentsTopCard",
+      "pattern": "flex row, two columns ~650px each",
+      "columns": [
+        { "name": "mainContentsCardLeft", "stack": ["NumberStat (누적 프로젝트 금액)", "NumberStat (포트폴리오 수)"] },
+        { "name": "card3", "padding": "30px 40px", "radius": "10px", "stack": ["title", "value", "description", "CTA arrow link"] }
+      ]
+    },
+    {
+      "id": "estimateGrid",
+      "selector": ".estimateCardWrap",
+      "pattern": "2-column grid via flex",
+      "cellSize": { "w": 650, "h": 223 },
+      "rowHeight": 494,
+      "tabFilter": ".estimateFilter (flex row, space-between)"
+    },
+    {
+      "id": "cardCarouselRow",
+      "appliesTo": ["partner", "portfolio", "review"],
+      "pattern": "horizontal scroll/swipe row of fixed-width cards with right margin",
+      "marginRight": "16px–18px"
+    },
+    {
+      "id": "processTimeline",
+      "selector": ".processBar",
+      "pattern": "horizontal 6-step bar above active step detail card",
+      "structure": ["bar (1px #e8e8e8)", "stepWrap (6× .step, one .step.on)", ".process detail (1320px, 40px 60px padding, 10px radius, 1px solid #e8e8e8)"]
+    },
+    {
+      "id": "footerRows",
+      "pattern": "two stacked rows (.footerWrap, .footerBotWrap) inside centered footer",
+      "footerHeight": 268,
+      "borderTop": "1px solid #e8e8e8"
+    }
+  ],
+
+  "components": [
+    {
+      "id": "Navbar",
+      "type": "Navbar",
+      "name": "GlobalHeader",
+      "reusable": true,
+      "selector": "#header_new",
+      "structure": {
+        "root": { "tag": "header", "position": "fixed", "top": 0, "zIndex": 2000, "width": "100%", "height": "68px", "bg": "#ffffff", "borderBottom": "1px solid #e8e8e8", "display": "flex", "justify": "center", "align": "center" },
+        "inner": { "selector": ".headerWrap", "maxWidth": 1080, "display": "flex", "justify": "space-between", "align": "center", "height": 67 },
+        "left": { "selector": ".headerLeft", "display": "flex", "align": "center", "children": ["Logo (img src=/public/images/freemoa-logo-none.svg, 90×17)", "NavLink × N"] },
+        "right": { "selector": ".headerRight", "display": "flex", "align": "center", "children": ["AuthLink (로그인)", "Divider |", "AuthLink (회원가입)", "PrimaryPillCTA (무료 견적 의뢰)"] }
+      },
+      "styles": {
+        "navLink": { "color": "#666666", "fontSize": "16px", "fontWeight": 400, "transition": "all 0.3s ease-in-out" },
+        "primaryCta": { "selector": ".requestBtn_new", "bg": "#fe7c25", "color": "#ffffff", "radius": "100px", "width": "110px", "height": "36px", "fontSize": "16px", "display": "flex", "justify": "center", "align": "center", "transition": "all 0.5s ease-in-out" }
+      },
+      "states": {
+        "primaryCta": { "hover": { "boxShadow": "rgba(0,0,0,0.2) 2px 2px 4px" } },
+        "moreToggle": { "selector": ".moreViewBtn", "default": { "fontSize": "18px", "color": "#555555" }, "open": { "label": "접기" }, "closed": { "label": "더보기" } }
+      },
+      "children": ["Logo", "NavLink", "MoreToggle", "AuthLinks", "PrimaryPillButton"],
+      "items": [
+        { "label": "프로젝트", "href": "/m4/s41" },
+        { "label": "파트너스", "href": "/m7/s71" },
+        { "label": "포트폴리오 검색", "href": "/m7/s712" },
+        { "label": "이용후기", "href": "/review/reviewList" },
+        { "label": "이용방법", "href": "/m1/guide?tab=guide_client", "inMore": true },
+        { "label": "블로그", "href": "https://blog.naver.com/freemoa1", "external": true, "inMore": true },
+        { "label": "예상견적 조회", "href": "/search", "inMore": true },
+        { "label": "프리미엄 PRO", "href": "https://pro.freemoa.net", "external": true, "inMore": true },
+        { "label": "개발자 채용", "href": "/teamdev", "inMore": true },
+        { "label": "유지보수", "href": "/management", "inMore": true }
+      ]
+    },
+    {
+      "id": "Hero",
+      "type": "Hero",
+      "name": "MainHero",
+      "reusable": false,
+      "selector": ".mainContentsTop",
+      "structure": {
+        "root": { "width": 1425, "height": 920, "padding": "70px 0px 50px", "display": "flex", "justify": "center", "bg": "#ffffff", "bgImage": "linear-gradient(rgba(255,255,255,0) 85%, #fff 100%), linear-gradient(to right, #fff5ec 0%, #fff5ec 33%, #eafbfe 100%)" },
+        "inner": { "selector": ".inner", "width": 1425, "height": 800 },
+        "title": { "selector": ".mainTitle .title", "tag": "h3", "height": 160, "margin": "114px 0px 50px", "composition": "span (당신이 찾는) + RollingText (rotating phrase)" },
+        "rotatingText": { "selector": ".rolling_text", "fontSize": "58px", "lineHeight": "57px", "fontWeight": 400, "color": "#262626", "phrases": ["프리랜서 개발자","프리랜서 디자이너","프리랜서 기획자","업무시스템 개발업체","웹서비스 개발업체","모바일앱 개발업체","AI 개발업체","플랫폼 개발업체","해외 개발업체"] },
+        "tagSpan": { "selector": ".mainTitle h3 > span", "fontSize": "59px", "lineHeight": "60px", "fontWeight": 300 },
+        "marqueeAbove": { "selector": ".cycle-slideshow.cycle-autoinit:first-of-type", "width": 1425, "height": 60, "type": "horizontal-marquee", "slides": 61 },
+        "marqueeBelow": { "selector": ".cycle-slideshow.cycle-autoinit:nth-of-type(2)", "width": 1425, "height": 60, "type": "horizontal-marquee", "slides": 61 },
+        "searchPanel": { "selector": ".mainSearchWrap", "width": 1120, "height": 212, "padding": "35px 40px 30px", "radius": "20px", "display": "flex", "align": "center", "children": ["MainSearch", "OrBar", "MainLink"] },
+        "mainSearch": { "selector": ".mainSearch", "width": 740, "height": 147, "children": ["Input (size 27px, h=82px)", "Suggestion chips (오픈마켓, 반려동물, 병원예약, O2O/중개, 배달, 교육, 헬스케어)"] },
+        "orBar": { "selector": ".mainOrBar", "width": 29, "label": "또는" },
+        "mainLink": { "selector": ".mainLink", "width": 201, "links": [ {"label": "무료 견적 의뢰", "href": "/m4/regProject"}, {"label": "간편 견적 조회", "href": "/search"} ] }
+      },
+      "interactions": ["rotating-text (jQuery cycle plugin)", "marquee scrollers (jQuery cycle)", "search autocomplete suggestions"]
+    },
+    {
+      "id": "StatPanel",
+      "type": "Section",
+      "name": "StatPanel",
+      "reusable": false,
+      "selector": ".mainContentsTopCard",
+      "structure": {
+        "layout": "flex row, gap implicit, two columns",
+        "left": {
+          "selector": ".mainContentsCardLeft",
+          "children": [
+            { "type": "NumberStat", "label": "누적 프로젝트 금액", "value": "424,363,430,000", "unit": "원" },
+            { "type": "NumberStat", "label": "포트폴리오 수", "value": "92,489", "unit": "건" }
+          ]
+        },
+        "right": {
+          "selector": ".card3",
+          "padding": "30px 40px",
+          "radius": "10px",
+          "children": [
+            { "type": "NumberStat", "label": "진행중 프로젝트 수", "value": "101", "unit": "건" },
+            { "type": "Paragraph", "text": "현재 프리모아를 통해 진행중인 기획, 디자인, 개발을 포함한 IT 프로젝트입니다." },
+            { "type": "ArrowLink", "label": "프로젝트 보러가기", "selector": ".cardBtn" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "NumberStat",
+      "type": "Card",
+      "name": "NumberStat",
+      "reusable": true,
+      "structure": { "children": ["label (h2)", "value (large number)", "unit (small)"] },
+      "styles": { "label": { "fontSize": "21px", "fontWeight": 600 }, "value": { "fontSize": "46px", "fontWeight": 700, "color": "#262626" }, "unit": { "fontSize": "17px", "color": "#555555" } }
+    },
+    {
+      "id": "EstimateSection",
+      "type": "Section",
+      "name": "ActiveBidsSection",
+      "reusable": false,
+      "selector": ".mainContents:nth-of-type(3)",
+      "structure": {
+        "title": "진행중인 비교견적",
+        "actions": ["MoreLink (더보기)"],
+        "tabs": { "selector": ".estimateFilter", "items": ["어플리케이션 개발","웹 개발","소프트웨어 개발","게임 개발","기획&디자인","영상제작","퍼블리싱","기타"], "activeClass": "on" },
+        "grid": { "selector": ".estimateCardWrap", "columns": 2, "cardWidth": 650, "cardHeight": 223 }
+      }
+    },
+    {
+      "id": "EstimateCard",
+      "type": "Card",
+      "name": "EstimateCard",
+      "reusable": true,
+      "selector": ".estimateCard.hrefCard",
+      "structure": { "width": 650, "height": 223, "display": "block" },
+      "variants": [{ "name": "hrefCard", "description": "Whole card is a link surface" }]
+    },
+    {
+      "id": "PartnerSection",
+      "type": "Section",
+      "name": "PartnerSection",
+      "reusable": true,
+      "selector": ".mainContentsGray",
+      "structure": {
+        "title": ["개발/디자인 업체", "프리랜서"],
+        "categoryTabs": ["개발", "디자인", "기획"],
+        "cards": "Row of .partnerCard"
+      },
+      "styles": { "background": "#f9f9f9" }
+    },
+    {
+      "id": "PartnerCard",
+      "type": "Card",
+      "name": "PartnerCard",
+      "reusable": true,
+      "selector": ".partnerCard",
+      "structure": {
+        "root": { "width": "258px", "height": "301px", "bg": "#ffffff", "radius": "10px", "padding": "25px", "marginRight": "16px" },
+        "children": [
+          { "selector": ".profileWrap", "children": [
+            { "selector": ".profile", "size": "80×80", "radius": "100px", "children": ["img (78×78)", "videoPlay overlay (25×32)"] }
+          ] },
+          { "selector": ".name", "children": [ { "tag": "p", "fontWeight": 600, "text": "id (masked)" }, { "selector": ".type", "color": "#aaaaaa", "text": "type (개인프리랜서)" } ] },
+          { "selector": ".category", "children": [ { "selector": "b.a (개발 badge)", "bg": "#edfafd", "color": "#31d0f4", "radius": "100px", "fontSize": "17px", "padding": "0px 10px" } ] },
+          { "selector": ".tech", "color": "#aaaaaa", "fontSize": "16px", "text": "comma-separated skill list" },
+          { "selector": ".info", "children": [
+            { "selector": ".starRating", "children": ["starRating_new (96×15 sprite)", "b (rating value 16px/600)"] },
+            { "tag": "p", "fontSize": "15px", "text": "계약 : N건" }
+          ] }
+        ]
+      },
+      "variants": [
+        { "name": "category-dev", "badge": { "bg": "#edfafd", "fg": "#31d0f4" } },
+        { "name": "category-design", "badge": { "bg": "#effaf6", "fg": "#41d89e" } },
+        { "name": "category-plan", "badge": { "bg": "#fdf2e9", "fg": "#ff7d12" } }
+      ]
+    },
+    {
+      "id": "PortfolioSection",
+      "type": "Section",
+      "name": "PortfolioSection",
+      "reusable": false,
+      "selector": ".mainContents:nth-of-type(6)",
+      "structure": { "title": "등록된 포트폴리오로 파트너 찾기", "action": "전체보기", "list": "row of .portfolioCard" }
+    },
+    {
+      "id": "PortfolioCard",
+      "type": "Card",
+      "name": "PortfolioCard",
+      "reusable": true,
+      "selector": ".portfolioCard",
+      "structure": {
+        "root": { "width": "305px", "height": "243px", "marginRight": "16px" },
+        "children": [
+          { "selector": ".imgWrap", "width": "305px", "height": "204px", "radius": "10px", "overflow": "hidden", "marginBottom": "12px", "children": [ { "tag": "img" } ] },
+          { "selector": "h2.title", "fontSize": "18px", "padding": "0px 5px", "lineClamp": 1 }
+        ]
+      },
+      "states": {
+        "imageHover": { "selector": ".portfolioCard .imgWrap > img:hover", "transform": "scale(1.1)", "transition": "transform 0.3s" }
+      }
+    },
+    {
+      "id": "ReviewSection",
+      "type": "Section",
+      "name": "ReviewSection",
+      "reusable": false,
+      "selector": ".mainContentsGradient",
+      "structure": { "title": "고객 이용후기", "action": "전체보기", "list": "row of .reviewCard.hrefCard" },
+      "styles": { "background": "linear-gradient(91deg, rgba(255,125,18,0.05) 0%, rgba(255,197,58,0.05) 29%, rgba(65,216,158,0.05) 64%, rgba(49,208,244,0.05) 100%)" }
+    },
+    {
+      "id": "ReviewCard",
+      "type": "Card",
+      "name": "ReviewCard",
+      "reusable": true,
+      "selector": ".reviewCard.hrefCard",
+      "structure": {
+        "root": { "width": "398px", "height": "335px", "bg": "#f2f2f2", "radius": "10px", "border": "1px solid #ffffff", "marginRight": "18px" },
+        "children": [
+          { "selector": "p.title", "fontSize": "20px", "color": "#262626", "marginBottom": "12px" },
+          { "selector": "p.text", "fontSize": "16px", "color": "#555555", "lineClamp": 3, "marginBottom": "22px" },
+          { "selector": ".info", "children": [
+            { "selector": ".starRating", "children": [".starRating_new", ".goldStar"] },
+            { "selector": "span.id", "text": "masked id" },
+            { "selector": ".review", "text": "review meta" }
+          ] }
+        ]
+      },
+      "states": { "titleHover": { "selector": ".reviewCard .title:hover", "textDecoration": "underline" } }
+    },
+    {
+      "id": "ProcessSection",
+      "type": "Section",
+      "name": "ProcessSection",
+      "reusable": false,
+      "selector": ".mainContents:last-of-type",
+      "structure": {
+        "title": "프리모아 진행프로세스",
+        "stepperBar": { "selector": ".processBar", "width": "1320px", "padding": "20px 0px 0px", "marginTop": "50px", "children": [
+          { "selector": ".bar", "height": "1px", "bg": "#e8e8e8" },
+          { "selector": ".stepWrap", "children": "6× .step" }
+        ] },
+        "step": { "selector": ".step", "size": "220×79", "display": "flex", "children": ["b (01-06 number)", "h2 (label)"], "activeClass": "on" },
+        "detail": { "selector": ".process", "width": "1320px", "height": "262px", "padding": "40px 60px", "radius": "10px", "border": "1px solid #e8e8e8", "position": "relative", "children": ["h3.num (STEP 0X)", "h2.title", "p.text"] },
+        "navigation": { "selector": ".processBtn.next / .processBtn.prev", "size": "48×48", "radius": "100px", "bg": "#ffffff", "border": "1px solid #e8e8e8", "position": "absolute" }
+      },
+      "steps": [
+        { "num": "01", "label": "프로젝트 등록 & 상담", "title": "마음에 드는 IT파트너를 찾고 계신가요?" },
+        { "num": "02", "label": "IT 전문가 모집", "title": "24시간 이내 평균 5.6팀의 지원서를 받아보세요." },
+        { "num": "03", "label": "3자미팅&선정", "title": "마음에 드는 지원자에게 \"미팅 요청\"을 해보세요." },
+        { "num": "04", "label": "계약", "title": "복잡한 계약과정 이젠 걱정하지 마세요." },
+        { "num": "05", "label": "프로젝트 진행(PMS)", "title": "프로젝트가 \"잘 진행이 되고 있는지\" 궁금하셨죠?" },
+        { "num": "06", "label": "프로젝트 완료", "title": "프로젝트 완료" }
+      ]
+    },
+    {
+      "id": "SectionHeader",
+      "type": "Section",
+      "name": "SectionHeader",
+      "reusable": true,
+      "selector": ".contentsTitle",
+      "structure": { "display": "flex", "justify": "space-between", "align": "center", "children": ["h2 (30px/700)", "a (link with chevron svg 19×19)"] }
+    },
+    {
+      "id": "CategoryBadge",
+      "type": "Badge",
+      "name": "CategoryBadge",
+      "reusable": true,
+      "selector": ".category b",
+      "structure": { "display": "inline-block", "padding": "0px 10px", "radius": "100px", "fontSize": "17px", "lineHeight": "28px" },
+      "variants": [
+        { "name": "dev",    "class": ".a", "bg": "#edfafd", "fg": "#31d0f4" },
+        { "name": "design", "class": ".b", "bg": "#effaf6", "fg": "#41d89e" },
+        { "name": "plan",   "class": ".c", "bg": "#fdf2e9", "fg": "#ff7d12" },
+        { "name": "etc",    "class": ".d", "bg": "#ffc53a", "fg": "#262626" }
+      ]
+    },
+    {
+      "id": "PillButtonPrimary",
+      "type": "Button",
+      "name": "PillButtonPrimary",
+      "reusable": true,
+      "selector": ".requestBtn_new, .b_colorA",
+      "structure": { "display": "flex", "justify": "center", "align": "center", "padding": "0 16px", "height": "36px", "minWidth": "110px", "radius": "100px" },
+      "styles": { "bg": "#fe7c25", "color": "#ffffff", "fontSize": "16px", "transition": "all 0.5s ease-in-out" },
+      "states": { "hover": { "boxShadow": "rgba(0,0,0,0.2) 2px 2px 4px" } }
+    },
+    {
+      "id": "GhostNavButton",
+      "type": "Button",
+      "name": "IconCircleButton",
+      "reusable": true,
+      "selector": ".processBtn",
+      "structure": { "size": "48×48", "radius": "100px", "bg": "#ffffff", "border": "1px solid #e8e8e8", "position": "absolute", "display": "flex", "justify": "center", "align": "center" },
+      "variants": [{ "name": "next" }, { "name": "prev" }]
+    },
+    {
+      "id": "TabsInline",
+      "type": "Tabs",
+      "name": "InlineTabs",
+      "reusable": true,
+      "selector": ".estimateFilter",
+      "structure": { "tag": "ul", "display": "flex", "justify": "space-between", "items": "li (.on for active)" },
+      "styles": { "fontSize": "18px", "lineHeight": "41px" },
+      "states": { "active": { "selector": "li.on", "color": "#262626", "fontWeight": 600 }, "default": { "color": "#666666" } }
+    },
+    {
+      "id": "ChipsuggestionList",
+      "type": "Chip",
+      "name": "SearchSuggestionChips",
+      "reusable": true,
+      "examples": ["오픈마켓", "반려동물", "병원예약", "O2O/중개", "배달", "교육", "헬스케어"]
+    },
+    {
+      "id": "StarRating",
+      "type": "Badge",
+      "name": "StarRating",
+      "reusable": true,
+      "selector": ".starRating",
+      "structure": { "display": "flex", "align": "center", "children": [".starRating_new (96×15 sprite)", "b (rating number, 16px, 600)"] },
+      "assets": ["/public/images/starRatingGray.png"]
+    },
+    {
+      "id": "Avatar",
+      "type": "Avatar",
+      "name": "Avatar",
+      "reusable": true,
+      "selector": ".profile",
+      "structure": { "size": "80×80", "radius": "100px", "overflow": "hidden", "children": ["img", "optional .videoPlay overlay"] }
+    },
+    {
+      "id": "MoreLink",
+      "type": "Button",
+      "name": "MoreLink",
+      "reusable": true,
+      "structure": { "display": "flex", "align": "center", "fontSize": "18px", "children": ["label (더보기/전체보기)", "ChevronSvg (19×19)"] }
+    },
+    {
+      "id": "Footer",
+      "type": "Footer",
+      "name": "GlobalFooter",
+      "reusable": true,
+      "selector": "#footer_new",
+      "structure": {
+        "root": { "tag": "footer", "height": "268px", "bg": "#ffffff", "color": "#666666", "fontSize": "13px", "borderTop": "1px solid #e8e8e8", "display": "flex", "justify": "center" },
+        "children": [
+          { "selector": ".footerWrap", "type": "links row", "items": [
+            { "label": "프리모아 스토리", "href": "/m1/introduce1" },
+            { "label": "이용약관", "href": "" },
+            { "label": "개인정보취급방침", "href": "", "emphasized": true },
+            { "label": "자주 찾는 질문", "href": "/m2/customer_main" },
+            { "label": "페이스북", "href": "https://www.facebook.com/freemoa.net" },
+            { "label": "네이버 포스트", "href": "http://post.naver.com/freemoa1" },
+            { "label": "네이버 블로그", "href": "http://blog.naver.com/freemoa1" },
+            { "label": "카카오톡 채널", "href": "https://pf.kakao.com/_rUrxdxd" },
+            { "label": "유튜브", "href": "https://youtu.be/Dpv9wCWg5-Q" }
+          ] },
+          { "selector": ".footerBotWrap", "type": "company meta", "lines": [
+            "고객센터 : 02-6497-3300",
+            "월-금 10:00 - 17:00 * 공휴일 휴무",
+            "프리모아 협업 제안 : contact@freemoa.net",
+            "히어로하우스 주식회사 / 대표 : 조재인",
+            "사업자등록번호 : 585-86-03332",
+            "서울특별시 강남구 선릉로100길 30, 유니콘빌딩 B1층",
+            "Copyright 2024 Herohouse"
+          ] }
+        ]
+      }
+    }
+  ],
+
+  "navigation": {
+    "primary": [
+      { "label": "프로젝트", "href": "/m4/s41" },
+      { "label": "파트너스", "href": "/m7/s71" },
+      { "label": "포트폴리오 검색", "href": "/m7/s712" },
+      { "label": "이용후기", "href": "/review/reviewList" }
+    ],
+    "secondaryInMoreToggle": [
+      { "label": "이용방법", "href": "/m1/guide?tab=guide_client" },
+      { "label": "블로그", "href": "https://blog.naver.com/freemoa1", "external": true },
+      { "label": "예상견적 조회", "href": "/search" },
+      { "label": "프리미엄 PRO", "href": "https://pro.freemoa.net", "external": true },
+      { "label": "개발자 채용", "href": "/teamdev" },
+      { "label": "유지보수", "href": "/management" }
+    ],
+    "auth": [
+      { "label": "로그인", "href": "/m0/s02" },
+      { "label": "회원가입", "href": "/m0/jointype" }
+    ],
+    "cta": { "label": "무료 견적 의뢰", "href": "/m4/regProject" },
+    "footer": [
+      { "label": "프리모아 스토리", "href": "/m1/introduce1" },
+      { "label": "자주 찾는 질문", "href": "/m2/customer_main" },
+      { "label": "페이스북", "href": "https://www.facebook.com/freemoa.net", "external": true },
+      { "label": "네이버 포스트", "href": "http://post.naver.com/freemoa1", "external": true },
+      { "label": "네이버 블로그", "href": "http://blog.naver.com/freemoa1", "external": true },
+      { "label": "카카오톡 채널", "href": "https://pf.kakao.com/_rUrxdxd", "external": true },
+      { "label": "유튜브", "href": "https://youtu.be/Dpv9wCWg5-Q", "external": true }
+    ]
+  },
+
+  "assets": {
+    "logos": [
+      { "id": "logo", "type": "svg", "src": "/public/images/freemoa-logo-none.svg", "width": 157, "height": 29 }
+    ],
+    "iconLibrary": "Font Awesome (font-awesome.min.css present, no rendered icons on home)",
+    "inlineSvgIcons": [
+      { "use": "chevron / arrow", "viewBox": "0 0 19 19", "uses": "MoreLink, 전체보기" },
+      { "use": "decorative", "viewBox": "0 0 25 25" },
+      { "use": "decorative", "viewBox": "0 0 40 43" }
+    ],
+    "rasterIcons": [
+      "/public/images/guide-book.png",
+      "/public/images/blog1.png",
+      "/public/images/price.png",
+      "/public/images/crown.png",
+      "/public/images/develop.png",
+      "/public/images/layers.png",
+      "/public/images/starRatingGray.png",
+      "/public/images/selectArrow.png"
+    ],
+    "decorativeImages": [
+      "/public/images/mainCardNew1.png",
+      "/public/images/mainCardNew2.png",
+      "/public/images/mainCardNew3.png",
+      "/public/images/bg-moseri01.jpg"
+    ],
+    "userContent": {
+      "host": "https://pic.freemoa.net",
+      "pathPattern": "/u/{userId}/{assetId}",
+      "sampleCount": 163,
+      "displayedSizes": ["303×250 (portfolio thumb crop)", "78×78 (avatar)"]
+    },
+    "gradients": [
+      "linear-gradient(rgba(255,255,255,0) 85%, #fff 100%)",
+      "linear-gradient(to right, #fff5ec 0%, #fff5ec 33%, #eafbfe 100%)",
+      "linear-gradient(91deg, rgba(255,125,18,0.05) 0%, rgba(255,197,58,0.05) 29%, rgba(65,216,158,0.05) 64%, rgba(49,208,244,0.05) 100%)"
+    ],
+    "fontsLoaded": ["Freesentation 100–900", "Noto Sans KR 100/300/400/500/700/900", "Lato-light", "Lato-regular", "NanumBarunGothic-light/500", "Gobold 300", "FontAwesome"]
+  },
+
+  "animations": {
+    "keyframes": [
+      { "name": "shake", "usage": "form / error attention" },
+      { "name": "moveUpDown", "usage": "subtle vertical bob (likely floating CTA / arrow)" },
+      { "name": "odsoky", "usage": "library-provided keyframe (mCustomScrollbar/toast)" },
+      { "name": "ani_slide_img", "usage": "image slide transition" },
+      { "name": "fa-spin", "usage": "FontAwesome spinner" },
+      { "name": "swiper-preloader-spin", "usage": "Swiper preloader" },
+      { "name": "market_banner_dollors", "usage": "money/banner animation (likely stats)" },
+      { "name": "dIKmRx", "usage": "auto-generated (styled-components-like)" },
+      { "name": "jtBULV", "usage": "auto-generated (styled-components-like)" }
+    ],
+    "transitions": {
+      "buttonsLinks": "all 0.3s ease-in-out",
+      "primaryCta": "all 0.5s ease-in-out",
+      "lazyReveal": "all 0.8s ease-in-out",
+      "imageZoom": { "selector": ".portfolioCard .imgWrap > img:hover", "transform": "scale(1.1)", "duration": "0.3s" }
+    },
+    "carousels": [
+      { "library": "jquery.cycle2", "selector": ".cycle-slideshow.cycle-autoinit", "behavior": "horizontal marquee", "instances": 2, "slidesPerInstance": 61, "trackWidth": 12000 },
+      { "library": "Swiper", "loaded": "/public/css/lib/swiper.min.css", "usage": "card row sliders (process detail, portfolio rows)" }
+    ],
+    "textRotation": { "selector": ".rolling_text", "behavior": "vertical phrase rotator", "container": ".rolling_div (450px × 86px, overflow hidden)" },
+    "scrollEffects": "intersection-based class toggles inferred from .on activation on .step (process timeline)"
+  },
+
+  "pageStructures": [
+    {
+      "id": "home",
+      "url": "/",
+      "topOffset": 68,
+      "totalHeight": 5397,
+      "sections": [
+        { "order": 1, "componentId": "Navbar", "y": 0, "height": 68, "fixed": true },
+        { "order": 2, "componentId": "Hero", "y": 0, "height": 920, "bg": "gradient-soft" },
+        { "order": 3, "componentId": "StatPanel", "y": 920, "height": 462, "padding": "90px 0px 0px" },
+        { "order": 4, "componentId": "EstimateSection", "y": 1382, "height": 849, "padding": "90px 0px" },
+        { "order": 5, "componentId": "PartnerSection", "y": 2231, "height": 448, "variant": "gray", "padding": "90px 0px 0px", "title": "개발/디자인 업체" },
+        { "order": 6, "componentId": "PartnerSection", "y": 2679, "height": 556, "variant": "gray", "padding": "90px 0px", "title": "프리랜서" },
+        { "order": 7, "componentId": "PortfolioSection", "y": 3235, "height": 498, "padding": "90px 0px" },
+        { "order": 8, "componentId": "ReviewSection", "y": 3733, "height": 590, "variant": "gradient", "padding": "90px 0px" },
+        { "order": 9, "componentId": "ProcessSection", "y": 4323, "height": 767, "padding": "90px 0px" },
+        { "order": 10, "componentId": "Footer", "y": 5089, "height": 268 }
+      ]
+    }
+  ],
+
+  "thirdPartyLibraries": [
+    "jQuery + jQuery UI 1.11.2 (custom)",
+    "jquery.cycle2 (text/marquee rotation)",
+    "Swiper (card sliders)",
+    "jquery.mCustomScrollbar (custom scrollbars)",
+    "smartWizard (multi-step wizard)",
+    "jquery.toast (toast notifications)",
+    "Font Awesome 4.x",
+    "Google Fonts (Noto Sans KR)",
+    "Freesentation (self-hosted Korean variable font)"
+  ],
+
+  "reactReconstruction": {
+    "rootTree": [
+      "AppShell",
+      "  Header (Navbar)",
+      "  Main",
+      "    HeroSection",
+      "      TitleRotator (rolling phrases)",
+      "      MarqueeRow x2",
+      "      SearchPanel",
+      "        SearchInput",
+      "        SuggestionChips",
+      "        OrSeparator",
+      "        MainLinks",
+      "    StatPanel (StatLeftStack + StatRightCard)",
+      "    EstimateSection",
+      "      SectionHeader",
+      "      InlineTabs",
+      "      EstimateGrid",
+      "        EstimateCard[]",
+      "    PartnerSection (variant: companies)",
+      "      SectionHeader + InlineTabs",
+      "      PartnerCardRow",
+      "        PartnerCard[]",
+      "    PartnerSection (variant: freelancers)",
+      "    PortfolioSection",
+      "      SectionHeader",
+      "      PortfolioCardRow",
+      "        PortfolioCard[]",
+      "    ReviewSection",
+      "      SectionHeader",
+      "      ReviewCardRow",
+      "        ReviewCard[]",
+      "    ProcessSection",
+      "      SectionTitle",
+      "      ProcessStepper (StepBar)",
+      "      ProcessDetailCard (.process active)",
+      "      ProcessNavButtons (prev/next)",
+      "  Footer"
+    ],
+    "reusable": ["Navbar","Footer","SectionHeader","NumberStat","PartnerCard","PortfolioCard","ReviewCard","EstimateCard","ProcessStepper","ProcessDetail","Avatar","StarRating","CategoryBadge","PillButtonPrimary","IconCircleButton","TabsInline","MoreLink","SearchInput","SuggestionChip"],
+    "variantProps": {
+      "Section": ["variant: default | gray | gradient | topHero"],
+      "CategoryBadge": ["variant: dev | design | plan | etc"],
+      "PillButton": ["variant: solid (orange) | ghost"],
+      "PartnerCard": ["category"],
+      "ProcessStep": ["state: idle | active"]
+    },
+    "stylingApproach": "Plain class-based CSS with CSS custom-property tokens recommended; primary font Freesentation; tokens map directly to designSystem section."
+  }
+}
