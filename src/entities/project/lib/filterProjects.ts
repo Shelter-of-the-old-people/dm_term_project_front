@@ -1,13 +1,7 @@
 import type { Project, ProjectQuery } from '../model/types'
 
 export function filterProjects(source: Project[], query: ProjectQuery) {
-  const filtered = source.filter((project) => {
-    const matchesType = query.type === 'all' || project.type === query.type
-    const matchesCategory =
-      query.categories.length === 0 || query.categories.some((category) => project.categories.includes(category))
-
-    return matchesType && matchesCategory
-  })
+  const filtered = source.filter((project) => query.type === 'all' || project.type === query.type)
 
   return sortProjects(filtered, query.sort)
 }

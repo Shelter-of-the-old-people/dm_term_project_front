@@ -1,4 +1,4 @@
-export type ProjectType = 'budget' | 'resident'
+﻿export type ProjectType = 'budget' | 'resident'
 
 export type ProjectStatus = '모집중' | '마감임박' | '검수중'
 
@@ -26,7 +26,6 @@ export type ProjectSort = 'freemoa' | 'latest' | 'highBudget' | 'lowBudget' | 'd
 
 export type ProjectQuery = {
   type: 'all' | ProjectType
-  categories: ProjectCategory[]
   sort: ProjectSort
   page: number
   pageSize: number

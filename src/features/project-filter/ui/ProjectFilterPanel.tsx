@@ -1,17 +1,15 @@
-import type { ProjectCategory, ProjectSort } from '@/entities/project'
+import type { ProjectSort } from '@/entities/project'
 import type { ProjectFilters, ProjectTypeFilter } from '../model/types'
 
 type ProjectFilterPanelProps = {
   filters: ProjectFilters
-  categories: ProjectCategory[]
   onTypeChange: (type: ProjectTypeFilter) => void
   onSortChange: (sort: ProjectSort) => void
-  onToggleCategory: (category: ProjectCategory) => void
 }
 
 const typeOptions: Array<{ value: ProjectTypeFilter; label: string }> = [
   { value: 'all', label: '전체' },
-  { value: 'budget', label: '기간제 외주' },
+  { value: 'budget', label: '도급(외주)' },
   { value: 'resident', label: '상주' },
 ]
 
@@ -25,10 +23,8 @@ const sortOptions: Array<{ value: ProjectSort; label: string }> = [
 
 export function ProjectFilterPanel({
   filters,
-  categories,
   onTypeChange,
   onSortChange,
-  onToggleCategory,
 }: ProjectFilterPanelProps) {
   return (
     <div className="project-filter" aria-label="프로젝트 필터">
@@ -42,19 +38,6 @@ export function ProjectFilterPanel({
           >
             {option.label}
           </button>
-        ))}
-      </div>
-
-      <div className="category-filter" aria-label="참여 파트 분류">
-        {categories.map((category) => (
-          <label key={category}>
-            <input
-              checked={filters.categories.includes(category)}
-              type="checkbox"
-              onChange={() => onToggleCategory(category)}
-            />
-            <span>{category}</span>
-          </label>
         ))}
       </div>
 
