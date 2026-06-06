@@ -49,7 +49,7 @@ const STATS_LEFT = [
 function MarqueeCard({ name, field, color }: { name: string; field: string; color: string }) {
   return (
     <a
-      href="/m7/s71"
+      href="/home#partners"
       className="inline-flex shrink-0 items-center gap-2.5 px-4.5 pl-2 py-2 rounded-pill bg-white/80 backdrop-blur-sm shadow-card whitespace-nowrap hover:-translate-y-0.5 hover:shadow-[0_4px_18px_rgba(0,0,0,0.14)] transition-all duration-200"
     >
       <span

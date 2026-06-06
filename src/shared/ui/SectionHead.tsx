@@ -8,17 +8,17 @@ type SectionHeadProps = {
 
 export function SectionHead({ title, moreHref, moreLabel = '더보기' }: SectionHeadProps) {
   return (
-    <div className="flex items-center justify-between mb-8">
-      <h2 className="text-[30px] font-bold text-ink leading-[44px] m-0">{title}</h2>
-      {moreHref && (
+    <div className="mb-8 flex items-center justify-between">
+      <h2 className="m-0 text-[30px] leading-[44px] font-bold text-ink">{title}</h2>
+      {moreHref ? (
         <a
           href={moreHref}
-          className="inline-flex items-center gap-0.5 text-lg text-ink hover:text-brand transition-colors"
+          className="inline-flex items-center gap-0.5 text-lg text-ink transition-colors hover:text-brand"
         >
           {moreLabel}
           <ChevronRight size={19} />
         </a>
-      )}
+      ) : null}
     </div>
   )
 }

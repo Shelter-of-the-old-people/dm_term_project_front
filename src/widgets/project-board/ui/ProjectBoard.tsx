@@ -10,13 +10,13 @@ import type { ProjectTypeFilter } from '@/features/project-filter'
 
 const TYPE_TABS: { label: string; value: ProjectTypeFilter }[] = [
   { label: '전체', value: 'all' },
-  { label: '도급(외주)', value: 'budget' },
+  { label: '도급(원격)', value: 'budget' },
   { label: '상주', value: 'resident' },
 ]
 
 const SORT_OPTIONS: { label: string; value: ProjectSort }[] = [
   { label: '프리모아 기본정렬', value: 'freemoa' },
-  { label: '최신 등록 순', value: 'latest' },
+  { label: '최신 등록순', value: 'latest' },
   { label: '금액 높은 순', value: 'highBudget' },
   { label: '금액 낮은 순', value: 'lowBudget' },
   { label: '마감 임박 순', value: 'deadline' },
@@ -54,9 +54,9 @@ export function ProjectBoard() {
   return (
     <section className="bg-soft py-22.5" id="projects">
       <div className="mx-auto max-w-330 px-5">
-        <SectionHead title="진행중인 비교견적" moreHref="/#projects" moreLabel="더보기" />
+        <SectionHead title="진행중인 비교견적" moreHref="/m4/s41?page=1" moreLabel="더보기" />
 
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <ul className="m-0 flex list-none gap-0 p-0">
             {TYPE_TABS.map((tab) => (
               <li
