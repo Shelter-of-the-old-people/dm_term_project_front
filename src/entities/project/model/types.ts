@@ -1,6 +1,6 @@
 export type ProjectType = 'budget' | 'resident'
 
-export type ProjectStatus = '모집중' | '마감임박' | '검수중'
+export type ProjectStatus = '모집중' | '마감'
 
 export type ProjectCategory = '개발' | '디자인' | '기획'
 

@@ -197,10 +197,8 @@ function mapProjectType(employmentType: BackendProject['employmentType']): Proje
 
 function mapProjectStatus(recruitStatus: BackendProject['recruitStatus']): ProjectStatus {
   switch (recruitStatus) {
-    case 'urgent':
-      return '마감임박'
     case 'reviewing':
-      return '검수중'
+      return '마감'
     default:
       return '모집중'
   }

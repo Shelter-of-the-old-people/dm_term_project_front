@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Heart, Search } from 'lucide-react'
+import { ChevronDown, ChevronRight, Heart, Search } from 'lucide-react'
 
 import { getProjects, PROJECT_PAGE_SIZE } from '@/entities/project'
 import type { Project, ProjectPage, ProjectSort } from '@/entities/project'
 import type { ProjectTypeFilter } from '@/features/project-filter'
-import { Badge } from '@/shared/ui'
 import { SiteFooter } from '@/widgets/site-footer'
 import { SiteHeader } from '@/widgets/site-header'
 
@@ -22,15 +21,13 @@ const SORT_OPTIONS: { label: string; value: ProjectSort }[] = [
   { label: '마감 임박 순', value: 'deadline' },
 ]
 
-const POPULAR_KEYWORDS = ['앱플랫폼', '중개 플랫폼', '배달앱', '교육용 앱', '의료 서비스']
-
 function readInitialPage() {
   const page = Number(new URLSearchParams(window.location.search).get('page') ?? '1')
   return Number.isFinite(page) && page > 0 ? page : 1
 }
 
 function formatProjectType(type: Project['type']) {
-  return type === 'budget' ? '도급' : '상주'
+  return type === 'budget' ? '도급' : '기간제 상주'
 }
 
 function formatBudget(project: Project) {
@@ -46,7 +43,7 @@ function formatBudget(project: Project) {
 }
 
 function formatBudgetLabel(project: Project) {
-  return project.type === 'budget' ? '예상 비용' : '월 임금'
+  return project.type === 'budget' ? '예상비용' : '월 임금'
 }
 
 function formatDeadlineLabel(project: Project) {
@@ -58,11 +55,7 @@ function formatDeadlineLabel(project: Project) {
 }
 
 function formatStatusTone(status: Project['status']) {
-  if (status === '마감임박') {
-    return 'orange'
-  }
-
-  if (status === '검수중') {
+  if (status === '마감') {
     return 'gray'
   }
 
@@ -86,6 +79,10 @@ function matchesSearch(project: Project, searchTerm: string) {
     .toLowerCase()
 
   return haystack.includes(normalized)
+}
+
+function formatCategoryLine(project: Project) {
+  return project.categories.join(',')
 }
 
 export function ProjectListPage() {
@@ -156,66 +153,52 @@ export function ProjectListPage() {
     () => projectPage.items.filter((project) => matchesSearch(project, searchTerm)),
     [projectPage.items, searchTerm],
   )
+  const pageNumbers = useMemo(
+    () => Array.from({ length: projectPage.totalPages }, (_, index) => index + 1),
+    [projectPage.totalPages],
+  )
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <SiteHeader />
-      <main className="mx-auto max-w-[1080px] px-5 py-7">
-        <section className="rounded-md border border-line bg-page px-8 py-8 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.25fr] lg:items-center">
+      <main className="mx-auto max-w-[1120px] px-5 py-7">
+        <section className="rounded-[6px] border border-[#e9e9e9] bg-page px-[44px] py-[31px] shadow-[0_1px_6px_rgba(0,0,0,0.07)]">
+          <div className="grid gap-8 lg:grid-cols-[1fr_460px] lg:items-center">
             <div>
-              <h1 className="text-[30px] font-bold tracking-[-0.02em] text-ink">
+              <h1 className="text-[26px] font-semibold tracking-[-0.03em] text-ink">
                 <span className="text-[#39b9ea]">프로젝트</span>를 찾아보세요.
               </h1>
-              <p className="mt-4 text-[16px] leading-7 text-dim">
-                진행하고자 하는 프로젝트에 적절한 견적과 분석 내용을 작성하여 지원해보세요.
-              </p>
-              <p className="mt-1 text-[16px] leading-7 text-dim">수주 가능성이 높아집니다.</p>
             </div>
 
-            <div>
-              <label className="block border-b-2 border-[#4fc4ee] pb-3">
-                <span className="mb-3 block text-[15px] font-medium text-ink">
-                  프로젝트 검색어를 입력해주세요.
+            <label className="block w-full justify-self-end border-b-[3px] border-[#39c4f5] pb-[10px] pt-[10px]">
+              <div className="flex items-center gap-[13px]">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="프로젝트 검색어를 입력해주세요."
+                  className="w-full border-none bg-transparent px-0 text-[14px] text-ink outline-none placeholder:text-[#c2c2c2]"
+                />
+                <Search size={24} strokeWidth={2.1} className="mt-[1px] shrink-0 text-[#39b9ea]" />
+                <span className="mt-[1px] flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#cfcfcf] text-white">
+                  <ChevronDown size={15} strokeWidth={2.6} />
                 </span>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="프로젝트 검색어를 입력해주세요."
-                    className="w-full border-none bg-transparent px-0 text-base text-ink outline-none placeholder:text-pale"
-                  />
-                  <Search size={22} className="shrink-0 text-[#39b9ea]" />
-                </div>
-              </label>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                {POPULAR_KEYWORDS.map((keyword) => (
-                  <button
-                    key={keyword}
-                    type="button"
-                    onClick={() => setSearchTerm(keyword)}
-                    className="rounded-full border border-line bg-page px-4 py-1.5 text-[14px] text-dim transition-colors hover:border-brand hover:text-brand"
-                  >
-                    {keyword}
-                  </button>
-                ))}
               </div>
-            </div>
+            </label>
           </div>
         </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[186px_minmax(0,1fr)]">
-          <aside className="self-start rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-            <div className="rounded-t-md bg-brand-solid px-5 py-4 text-sm font-semibold text-white">
+        <section className="mt-[18px] grid gap-[20px] lg:grid-cols-[182px_minmax(0,1fr)]">
+          <aside className="self-start overflow-hidden rounded-[8px] border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)] lg:mt-[46px]">
+            <div className="bg-brand-solid px-5 py-4 text-sm font-semibold text-white">
               프로젝트 필터
             </div>
-            <div className="border-b border-line px-5 py-3 text-[13px] text-dim">
-              체크된 필터 항상 적용
+            <div className="flex items-center gap-1.5 border-b border-line px-5 py-3 text-[13px] text-dim">
+              <span className="text-[#9a9a9a]">✓</span>
+              <span>체크된 필터 항상 적용</span>
             </div>
 
-            <div className="px-5 py-5">
+            <div className="px-5 pb-6 pt-5">
               <p className="mb-4 text-[15px] font-semibold text-ink">프로젝트 형태</p>
               <div className="space-y-3">
                 {TYPE_OPTIONS.map((option) => (
@@ -240,22 +223,27 @@ export function ProjectListPage() {
           </aside>
 
           <div>
-            <div className="mb-3 flex justify-end">
-              <select
-                value={sort}
-                onChange={(event) => {
-                  setSort(event.target.value as ProjectSort)
-                  setPage(1)
-                }}
-                className="h-10 rounded-md border border-line bg-page px-3 text-[13px] text-dim outline-none"
-                aria-label="정렬"
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+            <div className="mb-[10px] flex justify-end">
+              <div className="relative w-[182px]">
+                <select
+                  value={sort}
+                  onChange={(event) => {
+                    setSort(event.target.value as ProjectSort)
+                    setPage(1)
+                  }}
+                  className="h-[42px] w-full appearance-none rounded-[4px] border border-[#e6e6e6] bg-page pl-[14px] pr-[39px] text-[13px] font-medium text-dim outline-none"
+                  aria-label="정렬"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-[12px] top-1/2 -translate-y-1/2 text-[#7f7f7f]">
+                  <ChevronDown size={16} strokeWidth={2.1} />
+                </span>
+              </div>
             </div>
 
             {isLoading ? (
@@ -284,29 +272,40 @@ export function ProjectListPage() {
               </div>
             ) : null}
 
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                disabled={page <= 1}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-page text-dim disabled:opacity-30"
-              >
-                <ChevronLeft size={18} />
-              </button>
+            {projectPage.totalPages > 1 ? (
+              <div className="mt-[30px] flex items-center justify-center gap-[8px] pb-[2px] text-[12px] text-[#9a9a9a]">
+                {pageNumbers.map((pageNumber) => {
+                  const isActive = pageNumber === page
 
-              <span className="text-sm text-dim">
-                {projectPage.page} / {projectPage.totalPages}
-              </span>
+                  return (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => setPage(pageNumber)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={
+                        isActive
+                          ? 'flex h-[22px] min-w-[22px] items-center justify-center rounded-[2px] border border-[#dddddd] bg-page px-[6px] text-[12px] font-medium text-[#777777]'
+                          : 'flex h-[22px] min-w-[14px] items-center justify-center px-[2px] text-[12px] text-[#9a9a9a]'
+                      }
+                    >
+                      {pageNumber}
+                    </button>
+                  )
+                })}
 
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.min(projectPage.totalPages, current + 1))}
-                disabled={page >= projectPage.totalPages}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-page text-dim disabled:opacity-30"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
+                {page < projectPage.totalPages ? (
+                  <button
+                    type="button"
+                    onClick={() => setPage((current) => Math.min(projectPage.totalPages, current + 1))}
+                    aria-label="다음 페이지"
+                    className="ml-[2px] flex h-[22px] min-w-[14px] items-center justify-center px-[1px] text-[#9a9a9a]"
+                  >
+                    <ChevronRight size={12} strokeWidth={2.2} />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </section>
       </main>
@@ -316,68 +315,49 @@ export function ProjectListPage() {
 }
 
 function ProjectListCard({ project }: { project: Project }) {
-  const categoryText = project.categories.join(',')
-
   return (
     <a
       href={`/m4/s41v?projectId=${project.id}`}
-      className="block rounded-md border border-line bg-page p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+      className="block rounded-[6px] border border-[#e9e9e9] bg-page px-[24px] py-[24px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_5px_16px_rgba(0,0,0,0.08)]"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="text-[22px] font-semibold leading-8 text-ink">{project.title}</h2>
-          <p className="mt-2 text-[14px] text-[#ff8a35]">{categoryText}</p>
+          <h2 className="text-[23px] font-semibold leading-[1.35] tracking-[-0.025em] text-ink">
+            {project.title}
+          </h2>
+
+          <div className="mt-[10px] flex flex-wrap items-center gap-[6px]">
+            <span className="mr-[2px] text-[14px] font-medium text-[#ff7f2a]">
+              {formatCategoryLine(project)}
+            </span>
+            {project.skills.map((skill) => (
+              <span
+                key={skill}
+                className="rounded-[3px] border border-[#d7d7d7] bg-page px-[9px] py-[4px] text-[12px] font-medium leading-none text-[#555f69]"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Badge tone="orange">{formatProjectType(project.type)}</Badge>
-          <Badge tone={formatStatusTone(project.status)}>{project.status}</Badge>
-          <span className="text-[#cfcfcf]">
-            <Heart size={18} />
+        <div className="flex shrink-0 items-center gap-[8px] pt-[4px]">
+          <ProjectBadge tone={project.type === 'budget' ? 'orange' : 'blue'}>
+            {formatProjectType(project.type)}
+          </ProjectBadge>
+          <ProjectBadge tone={formatStatusTone(project.status)}>{project.status}</ProjectBadge>
+          <span className="text-[#d1d1d1]">
+            <Heart size={22} strokeWidth={1.9} />
           </span>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {project.skills.map((skill) => (
-          <span
-            key={skill}
-            className="rounded-sm border border-[#e6e6e6] bg-page px-2.5 py-1 text-[12px] text-dim"
-          >
-            {skill}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-4 rounded-sm bg-[#fafafa] px-4 py-4 text-[14px] text-dim">
-        <div className="grid gap-3 sm:grid-cols-4 sm:divide-x sm:divide-[#e6e6e6]">
+      <div className="mt-[18px] rounded-[2px] bg-[#f7f7f7] px-[8px] py-[13px]">
+        <div className="grid gap-2 sm:grid-cols-4 sm:divide-x sm:divide-[#d9d9d9]">
           <StatCell label={formatBudgetLabel(project)} value={formatBudget(project)} />
           <StatCell label="예상기간" value={`${project.averagePeriodDays}일`} />
           <StatCell label="지원자수" value={`${project.applicants}명`} />
           <StatCell label="마감일정" value={formatDeadlineLabel(project)} />
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div>
-          <p className="text-[13px] leading-7 text-dim">
-            ※ 프로젝트 요약 : {project.summary} · 회사 위치 : {project.area} · 등록일 :
-            {' '}
-            {project.postedAt.slice(0, 10)}
-          </p>
-        </div>
-
-        <div className="border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ebf6fb] text-sm font-semibold text-[#58aed4]">
-              {project.title.charAt(0)}
-            </div>
-            <div>
-              <p className="text-[15px] font-semibold text-ink">등록 계정</p>
-              <p className="text-[13px] text-pale">{project.area}</p>
-            </div>
-          </div>
-          <p className="mt-3 text-[13px] text-[#ff8a35]">연락처 인증</p>
         </div>
       </div>
     </a>
@@ -386,9 +366,34 @@ function ProjectListCard({ project }: { project: Project }) {
 
 function StatCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="sm:px-4 sm:first:pl-0 sm:last:pr-0">
-      <p className="text-[13px] text-pale">{label}</p>
-      <p className="mt-2 font-semibold text-ink">{value}</p>
+    <div className="flex items-center justify-center px-2 text-center sm:px-3 sm:first:pl-2 sm:last:pr-2">
+      <p className="whitespace-nowrap text-[13px] leading-none">
+        <span className="text-[#7a838d]">{label}</span>
+        <span className="ml-1.5 font-semibold text-ink">{value}</span>
+      </p>
     </div>
+  )
+}
+
+function ProjectBadge({
+  children,
+  tone,
+}: {
+  children: string
+  tone: 'orange' | 'blue' | 'gray'
+}) {
+  const className =
+    tone === 'orange'
+      ? 'bg-[#fff4e7] text-[#d8891c]'
+      : tone === 'gray'
+        ? 'bg-[#f2f2f2] text-[#8c8c8c]'
+        : 'bg-[#e4f6ff] text-[#3c8ec6]'
+
+  return (
+    <span
+      className={`inline-flex h-[32px] items-center rounded-full px-[15px] text-[12px] font-semibold ${className}`}
+    >
+      {children}
+    </span>
   )
 }

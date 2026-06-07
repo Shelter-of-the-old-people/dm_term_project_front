@@ -5,7 +5,7 @@ import { Badge } from '@/shared/ui'
 import type { Project } from '../model/types'
 
 export function ProjectCard({ project }: { project: Project }) {
-  const tone = project.status === '마감임박' ? 'orange' : project.status === '검수중' ? 'gray' : 'blue'
+  const tone = project.status === '마감' ? 'gray' : 'blue'
 
   return (
     <a

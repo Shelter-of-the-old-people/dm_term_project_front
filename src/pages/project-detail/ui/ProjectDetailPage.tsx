@@ -290,8 +290,7 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
   }
 
   const project = state.project
-  const statusTone =
-    project.status === '마감임박' ? 'orange' : project.status === '검수중' ? 'gray' : 'blue'
+  const statusTone = project.status === '마감' ? 'gray' : 'blue'
 
   return (
     <div className="min-h-screen bg-[#f6f7f9]">
