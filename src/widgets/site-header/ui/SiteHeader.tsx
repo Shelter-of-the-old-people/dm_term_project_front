@@ -22,6 +22,7 @@ const MORE_ITEMS = [
 export function SiteHeader() {
   const [moreOpen, setMoreOpen] = useState(false)
   const sessionUser = useSessionUser()
+  const pathname = window.location.pathname
 
   return (
     <header className="fixed left-0 right-0 top-0 z-[2000] border-b border-line bg-page">
@@ -32,7 +33,11 @@ export function SiteHeader() {
 
         <nav className="flex flex-1 items-center" aria-label="주요 메뉴">
           {NAV_ITEMS.map((item) => (
-            <a key={item.href} href={item.href} className="nav-link">
+            <a
+              key={item.href}
+              href={item.href}
+              className={`nav-link ${pathname === '/m4/s41' && item.href.startsWith('/m4/s41') ? 'nav-link-active' : ''}`}
+            >
               {item.label}
             </a>
           ))}

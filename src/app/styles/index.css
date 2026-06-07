@@ -103,6 +103,8 @@ button, input, select { font: inherit; }
 }
 .nav-link:hover { color: var(--color-ink); }
 .nav-link:hover::after { transform: scaleX(1); }
+.nav-link-active { color: var(--color-brand); }
+.nav-link-active::after { transform: scaleX(1); }
 
 /* ════════════════════════════════════════
    DROPDOWN — keyframe + animation
