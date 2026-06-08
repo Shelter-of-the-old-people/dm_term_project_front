@@ -1,12 +1,10 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 
 import { writeSessionUser } from '@/shared/lib'
-import type { SessionRole } from '@/shared/lib'
 import { SiteFooter } from '@/widgets/site-footer'
 import { SiteHeader } from '@/widgets/site-header'
 
 export function LoginPage() {
-  const [role, setRole] = useState<SessionRole>('developer')
   const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -27,7 +25,6 @@ export function LoginPage() {
       await writeSessionUser({
         loginId: loginId.trim(),
         password: password.trim(),
-        role,
       })
 
       window.location.assign('/mypage')
@@ -51,7 +48,6 @@ export function LoginPage() {
           description="백엔드 세션 로그인으로 연결되어 있습니다. 테스트 계정은 developer1 / 1234, client1 / 1234 입니다."
         >
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-            <RoleField role={role} onChange={setRole} />
             <TextField
               label="아이디"
               value={loginId}
@@ -103,48 +99,6 @@ function AuthCard({
       <p className="mt-3 text-base leading-7 text-dim">{description}</p>
       {children}
     </section>
-  )
-}
-
-function RoleField({
-  role,
-  onChange,
-}: {
-  role: SessionRole
-  onChange: (role: SessionRole) => void
-}) {
-  return (
-    <div>
-      <p className="mb-2 text-sm font-semibold text-ink">역할</p>
-      <div className="grid grid-cols-2 gap-3">
-        <RoleOption active={role === 'developer'} label="개발자" onClick={() => onChange('developer')} />
-        <RoleOption active={role === 'client'} label="클라이언트" onClick={() => onChange('client')} />
-      </div>
-    </div>
-  )
-}
-
-function RoleOption({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex h-11 items-center justify-center rounded-2xl border text-sm font-semibold transition-colors ${
-        active
-          ? 'border-brand bg-[#fff4ea] text-brand'
-          : 'border-line bg-page text-dim hover:border-brand hover:text-brand'
-      }`}
-    >
-      {label}
-    </button>
   )
 }
 

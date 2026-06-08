@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent, KeyboardEvent, ReactNode } from 'react'
 
 import {
   getDeveloperProfile,
@@ -10,6 +10,46 @@ import {
 import type { DeveloperProfile, ProfileSupportField } from '@/entities/profile'
 
 const SUPPORT_FIELD_OPTIONS: ProfileSupportField[] = ['개발', '디자인', '기획']
+const BUSINESS_TYPE_OPTIONS = ['개인프리랜서', '팀프리랜서', '개인사업자', '법인사업자']
+const CAREER_YEAR_OPTIONS = Array.from({ length: 21 }, (_, index) => `${index}년`)
+const REGION_OPTIONS: Record<string, string[]> = {
+  서울특별시: ['강남구', '서초구', '송파구', '마포구', '구로구', '영등포구'],
+  부산광역시: ['해운대구', '수영구', '부산진구', '남구', '동래구'],
+  대구광역시: ['수성구', '달서구', '중구', '북구'],
+  인천광역시: ['연수구', '남동구', '부평구', '서구'],
+  광주광역시: ['서구', '북구', '광산구', '동구'],
+  대전광역시: ['유성구', '서구', '중구', '동구'],
+  울산광역시: ['남구', '중구', '북구', '동구'],
+  세종특별자치시: ['세종시'],
+  경기도: ['성남시', '수원시', '용인시', '고양시', '화성시', '부천시'],
+  강원특별자치도: ['춘천시', '원주시', '강릉시'],
+  충청북도: ['청주시', '충주시', '제천시'],
+  충청남도: ['천안시', '아산시', '공주시'],
+  전라북도: ['전주시', '군산시', '익산시'],
+  전라남도: ['목포시', '순천시', '여수시'],
+  경상북도: ['구미시', '포항시', '경산시', '안동시'],
+  경상남도: ['창원시', '김해시', '진주시', '양산시'],
+  제주특별자치도: ['제주시', '서귀포시'],
+}
+const REGION_ALIASES: Record<string, string> = {
+  서울: '서울특별시',
+  부산: '부산광역시',
+  대구: '대구광역시',
+  인천: '인천광역시',
+  광주: '광주광역시',
+  대전: '대전광역시',
+  울산: '울산광역시',
+  세종: '세종특별자치시',
+  경기: '경기도',
+  강원: '강원특별자치도',
+  충북: '충청북도',
+  충남: '충청남도',
+  전북: '전라북도',
+  전남: '전라남도',
+  경북: '경상북도',
+  경남: '경상남도',
+  제주: '제주특별자치도',
+}
 
 type ProfileLoadState = {
   isLoading: boolean
@@ -32,7 +72,8 @@ type ProfileFormState = {
   regionSigungu: string
   businessType: string
   careerYears: string
-  searchTags: string
+  searchTags: string[]
+  tagInput: string
   introduction: string
 }
 
@@ -42,10 +83,49 @@ const EMPTY_FORM: ProfileFormState = {
   onsiteAvailable: false,
   regionSido: '',
   regionSigungu: '',
-  businessType: '',
+  businessType: BUSINESS_TYPE_OPTIONS[0],
   careerYears: '0',
-  searchTags: '',
+  searchTags: [],
+  tagInput: '',
   introduction: '',
+}
+
+function normalizeBusinessType(value: string) {
+  const normalized = value.replaceAll(' ', '').trim()
+
+  if (normalized === '개인프리랜서' || normalized === '팀프리랜서') {
+    return normalized
+  }
+
+  return value.trim()
+}
+
+function normalizeRegionSido(value: string) {
+  const trimmed = value.trim()
+  return REGION_ALIASES[trimmed] ?? trimmed
+}
+
+function buildBusinessOptions(currentValue: string) {
+  const normalized = normalizeBusinessType(currentValue)
+  return BUSINESS_TYPE_OPTIONS.includes(normalized)
+    ? BUSINESS_TYPE_OPTIONS
+    : normalized
+      ? [...BUSINESS_TYPE_OPTIONS, normalized]
+      : BUSINESS_TYPE_OPTIONS
+}
+
+function buildRegionSidoOptions(currentValue: string) {
+  const normalized = normalizeRegionSido(currentValue)
+  const options = Object.keys(REGION_OPTIONS)
+
+  return options.includes(normalized) || !normalized ? options : [...options, normalized]
+}
+
+function buildRegionSigunguOptions(regionSido: string, currentValue: string) {
+  const options = REGION_OPTIONS[normalizeRegionSido(regionSido)] ?? []
+  const trimmed = currentValue.trim()
+
+  return options.includes(trimmed) || !trimmed ? options : [...options, trimmed]
 }
 
 function createFormState(profile: DeveloperProfile): ProfileFormState {
@@ -53,20 +133,21 @@ function createFormState(profile: DeveloperProfile): ProfileFormState {
     supportFields: profile.supportFields,
     activeAvailable: profile.activeAvailable,
     onsiteAvailable: profile.onsiteAvailable,
-    regionSido: profile.regionSido,
+    regionSido: normalizeRegionSido(profile.regionSido),
     regionSigungu: profile.regionSigungu,
-    businessType: profile.businessType,
+    businessType: normalizeBusinessType(profile.businessType || BUSINESS_TYPE_OPTIONS[0]),
     careerYears: String(profile.careerYears),
-    searchTags: profile.searchTags.join(', '),
+    searchTags: profile.searchTags,
+    tagInput: '',
     introduction: profile.introduction,
   }
 }
 
-function parseSearchTags(value: string) {
+function parseTags(value: string) {
   return Array.from(
     new Set(
       value
-        .split(',')
+        .split(/[,\n]/)
         .map((tag) => tag.trim())
         .filter(Boolean),
     ),
@@ -74,13 +155,13 @@ function parseSearchTags(value: string) {
 }
 
 export function DeveloperProfileSection() {
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const [profileState, setProfileState] = useState<ProfileLoadState>({
     isLoading: true,
     errorMessage: null,
     item: null,
   })
   const [form, setForm] = useState<ProfileFormState>(EMPTY_FORM)
-  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null)
   const [saveState, setSaveState] = useState<SaveState>({
     isSaving: false,
     isUploadingImage: false,
@@ -91,14 +172,15 @@ export function DeveloperProfileSection() {
   useEffect(() => {
     let cancelled = false
 
-    setProfileState({
-      isLoading: true,
-      errorMessage: null,
-      item: null,
-    })
+    async function loadProfile() {
+      setProfileState({
+        isLoading: true,
+        errorMessage: null,
+        item: null,
+      })
 
-    void getDeveloperProfile()
-      .then((profile) => {
+      try {
+        const profile = await getDeveloperProfile()
         if (cancelled) {
           return
         }
@@ -109,8 +191,7 @@ export function DeveloperProfileSection() {
           item: profile,
         })
         setForm(createFormState(profile))
-      })
-      .catch((error) => {
+      } catch (error) {
         if (cancelled) {
           return
         }
@@ -123,7 +204,10 @@ export function DeveloperProfileSection() {
               : '프로필 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
           item: null,
         })
-      })
+      }
+    }
+
+    void loadProfile()
 
     return () => {
       cancelled = true
@@ -136,6 +220,7 @@ export function DeveloperProfileSection() {
       errorMessage: null,
       successMessage: null,
     }))
+
     setForm((current) => ({
       ...current,
       [key]: value,
@@ -156,25 +241,60 @@ export function DeveloperProfileSection() {
 
   function handleImageFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
-    setPendingImageFile(file)
     setSaveState((current) => ({
       ...current,
       errorMessage: null,
       successMessage: null,
     }))
+
+    if (!file) {
+      return
+    }
+
+    void handleImageUpload(file)
+    event.target.value = ''
   }
 
-  async function handleImageUpload() {
-    if (!pendingImageFile) {
+  function addTagsFromInput() {
+    const nextTags = parseTags(form.tagInput)
+    if (nextTags.length === 0) {
+      return
+    }
+
+    const mergedTags = Array.from(new Set([...form.searchTags, ...nextTags]))
+
+    if (mergedTags.length > 5) {
       setSaveState({
         isSaving: false,
         isUploadingImage: false,
-        errorMessage: '먼저 업로드할 이미지를 선택해주세요.',
+        errorMessage: '검색 태그는 최대 5개까지 등록할 수 있습니다.',
         successMessage: null,
       })
       return
     }
 
+    setForm((current) => ({
+      ...current,
+      searchTags: mergedTags,
+      tagInput: '',
+    }))
+  }
+
+  function removeTag(tagToRemove: string) {
+    setForm((current) => ({
+      ...current,
+      searchTags: current.searchTags.filter((tag) => tag !== tagToRemove),
+    }))
+  }
+
+  function handleTagKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault()
+      addTagsFromInput()
+    }
+  }
+
+  async function handleImageUpload(file: File) {
     setSaveState({
       isSaving: false,
       isUploadingImage: true,
@@ -183,7 +303,7 @@ export function DeveloperProfileSection() {
     })
 
     try {
-      const result = await uploadDeveloperProfileImage(pendingImageFile)
+      const result = await uploadDeveloperProfileImage(file)
 
       setProfileState((current) => ({
         ...current,
@@ -194,7 +314,6 @@ export function DeveloperProfileSection() {
             }
           : current.item,
       }))
-      setPendingImageFile(null)
       setSaveState({
         isSaving: false,
         isUploadingImage: false,
@@ -216,7 +335,6 @@ export function DeveloperProfileSection() {
     event.preventDefault()
 
     const careerYears = Number(form.careerYears)
-    const searchTags = parseSearchTags(form.searchTags)
 
     if (
       form.supportFields.length === 0 ||
@@ -236,11 +354,11 @@ export function DeveloperProfileSection() {
       return
     }
 
-    if (searchTags.length > 5) {
+    if (form.searchTags.length > 5) {
       setSaveState({
         isSaving: false,
         isUploadingImage: false,
-        errorMessage: '검색 태그는 최대 5개까지 입력할 수 있습니다.',
+        errorMessage: '검색 태그는 최대 5개까지만 등록할 수 있습니다.',
         successMessage: null,
       })
       return
@@ -258,11 +376,11 @@ export function DeveloperProfileSection() {
         supportFields: form.supportFields,
         activeAvailable: form.activeAvailable,
         onsiteAvailable: form.onsiteAvailable,
-        regionSido: form.regionSido.trim(),
+        regionSido: normalizeRegionSido(form.regionSido.trim()),
         regionSigungu: form.regionSigungu.trim(),
-        businessType: form.businessType.trim(),
+        businessType: normalizeBusinessType(form.businessType.trim()),
         careerYears,
-        searchTags,
+        searchTags: form.searchTags,
         introduction: form.introduction.trim(),
       })
 
@@ -276,7 +394,7 @@ export function DeveloperProfileSection() {
         isSaving: false,
         isUploadingImage: false,
         errorMessage: null,
-        successMessage: '개발자 프로필이 저장되었습니다.',
+        successMessage: '프로필 정보가 저장되었습니다.',
       })
     } catch (error) {
       setSaveState({
@@ -290,222 +408,235 @@ export function DeveloperProfileSection() {
   }
 
   if (profileState.isLoading) {
-    return <CenteredState>개발자 프로필을 불러오는 중입니다.</CenteredState>
+    return <InlineState>프로필 정보를 불러오는 중입니다.</InlineState>
   }
 
   if (profileState.errorMessage) {
-    return <CenteredState tone="error">{profileState.errorMessage}</CenteredState>
+    return <InlineState tone="error">{profileState.errorMessage}</InlineState>
   }
 
   if (!profileState.item) {
-    return <CenteredState>프로필 정보를 찾을 수 없습니다.</CenteredState>
+    return <InlineState>프로필 정보를 찾을 수 없습니다.</InlineState>
   }
 
   const profileImageUrl = resolveDeveloperProfileImageUrl(profileState.item.profileImageUrl)
+  const businessOptions = buildBusinessOptions(form.businessType)
+  const regionSidoOptions = buildRegionSidoOptions(form.regionSido)
+  const regionSigunguOptions = buildRegionSigunguOptions(form.regionSido, form.regionSigungu)
+
+  function handleRegionSidoChange(value: string) {
+    const normalizedRegionSido = normalizeRegionSido(value)
+    const nextSigunguOptions = REGION_OPTIONS[normalizedRegionSido] ?? []
+
+    setSaveState((current) => ({
+      ...current,
+      errorMessage: null,
+      successMessage: null,
+    }))
+
+    setForm((current) => ({
+      ...current,
+      regionSido: normalizedRegionSido,
+      regionSigungu: nextSigunguOptions.includes(current.regionSigungu) ? current.regionSigungu : '',
+    }))
+  }
 
   return (
-    <section className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-      <aside className="rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-        <div className="border-b border-line px-6 py-5">
-          <p className="text-[13px] font-medium text-[#39b9ea]">Developer Profile</p>
-          <h2 className="mt-2 text-[22px] font-bold text-ink">{profileState.item.nickname}</h2>
-          <p className="mt-2 text-[13px] text-pale">{profileState.item.loginId}</p>
-        </div>
+    <div>
+      <form className="px-6 py-8" onSubmit={(event) => void handleSubmit(event)}>
+        <div className="space-y-8">
+          <ProfileRow label="프로필 이미지">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              <div className="flex items-center gap-6">
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt={`${profileState.item.nickname} 프로필 이미지`}
+                    className="h-28 w-28 rounded-full border border-line object-cover"
+                  />
+                ) : (
+                  <div className="flex h-28 w-28 items-center justify-center rounded-full border border-dashed border-line bg-[#fafafa] text-[30px] font-bold text-[#39b9ea]">
+                    {profileState.item.nickname.slice(0, 1)}
+                  </div>
+                )}
 
-        <div className="px-6 py-6">
-          <div className="flex justify-center">
-            {profileImageUrl ? (
-              <img
-                src={profileImageUrl}
-                alt={`${profileState.item.nickname} 프로필 이미지`}
-                className="h-36 w-36 rounded-full border border-line object-cover shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
-              />
-            ) : (
-              <div className="flex h-36 w-36 items-center justify-center rounded-full border border-dashed border-line bg-[#fafafa] text-[32px] font-bold text-[#39b9ea]">
-                {profileState.item.nickname.slice(0, 1)}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <label className="block">
-              <span className="mb-2 block text-[13px] font-semibold text-ink">프로필 이미지</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                className="block w-full text-[13px] text-dim file:mr-3 file:rounded-md file:border-0 file:bg-[#eef8fd] file:px-3 file:py-2 file:text-[13px] file:font-semibold file:text-[#2f86b4]"
-              />
-            </label>
-
-            {pendingImageFile ? (
-              <p className="text-[12px] leading-5 text-pale">선택한 파일: {pendingImageFile.name}</p>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={() => void handleImageUpload()}
-              disabled={saveState.isUploadingImage}
-              className="inline-flex h-11 w-full items-center justify-center rounded-md border border-line bg-page px-4 text-sm font-semibold text-dim disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saveState.isUploadingImage ? '업로드 중...' : '이미지 업로드'}
-            </button>
-          </div>
-
-          <div className="mt-6 grid gap-3">
-            <AvailabilityBadge
-              label="즉시 투입 가능"
-              active={profileState.item.activeAvailable}
-            />
-            <AvailabilityBadge
-              label="상주 가능"
-              active={profileState.item.onsiteAvailable}
-            />
-          </div>
-
-          <div className="mt-6 space-y-3 rounded-sm border border-line bg-[#fafafa] px-4 py-4">
-            <InfoRow label="희망 지역" value={`${profileState.item.regionSido} ${profileState.item.regionSigungu}`} />
-            <InfoRow label="사업자 형태" value={profileState.item.businessType} />
-            <InfoRow label="경력" value={`${profileState.item.careerYears}년`} />
-          </div>
-        </div>
-      </aside>
-
-      <section className="rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-        <div className="border-b border-line px-6 py-5">
-          <p className="text-[13px] font-medium text-[#39b9ea]">Profile Management</p>
-          <h2 className="mt-2 text-[24px] font-bold text-ink">개발자 프로필 관리</h2>
-          <p className="mt-3 text-[14px] leading-7 text-dim">
-            지원 가능 분야, 활동 가능 여부, 희망 지역, 검색 태그와 소개글을 수정할 수 있습니다.
-          </p>
-        </div>
-
-        <form className="px-6 py-6" onSubmit={(event) => void handleSubmit(event)}>
-          <div className="grid gap-6 md:grid-cols-2">
-            <FormField label="지원 분야">
-              <div className="flex flex-wrap gap-3">
-                {SUPPORT_FIELD_OPTIONS.map((field) => {
-                  const checked = form.supportFields.includes(field)
-
-                  return (
-                    <label
-                      key={field}
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-sm border px-4 py-2 text-[14px] ${
-                        checked
-                          ? 'border-[#39b9ea] bg-[#f3fbff] text-[#2d85b3]'
-                          : 'border-line bg-page text-dim'
-                      }`}
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      disabled={saveState.isUploadingImage}
+                      className="inline-flex h-9 items-center justify-center rounded-full border border-[#ff8b2b] px-5 text-[13px] font-semibold text-[#ff8b2b] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(event) => handleSupportFieldToggle(field, event.target.checked)}
-                      />
-                      {field}
-                    </label>
-                  )
-                })}
-              </div>
-            </FormField>
+                      {saveState.isUploadingImage ? '업로드 중...' : '업데이트'}
+                    </button>
+                  </div>
 
-            <FormField label="활동 상태">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ToggleCard
-                  label="즉시 투입 가능"
-                  checked={form.activeAvailable}
-                  onChange={(checked) => updateField('activeAvailable', checked)}
-                />
-                <ToggleCard
-                  label="상주 가능"
-                  checked={form.onsiteAvailable}
-                  onChange={(checked) => updateField('onsiteAvailable', checked)}
-                />
+                  <HelperText>
+                    개인/팀 프로필 등의 이미지를 등록해주세요.
+                    <br />
+                    미팅 선정률이 높아질 수 있습니다.
+                  </HelperText>
+                </div>
               </div>
-            </FormField>
+            </div>
+          </ProfileRow>
 
-            <FormField label="지역 1단계">
-              <TextInput
-                value={form.regionSido}
-                placeholder="예: 서울"
-                onChange={(value) => updateField('regionSido', value)}
+          <ProfileRow label="지원분야 *">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              {SUPPORT_FIELD_OPTIONS.map((field) => (
+                <label key={field} className="inline-flex items-center gap-2 text-[15px] text-[#333]">
+                  <input
+                    type="checkbox"
+                    checked={form.supportFields.includes(field)}
+                    onChange={(event) => handleSupportFieldToggle(field, event.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  {field}
+                </label>
+              ))}
+            </div>
+          </ProfileRow>
+
+          <ProfileRow label="활동가능여부">
+            <div>
+              <InlineCheckbox
+                label="가능시 체크"
+                checked={form.activeAvailable}
+                onChange={(checked) => updateField('activeAvailable', checked)}
               />
-            </FormField>
+              <HelperText>클라이언트에게 지원요청을 받으려면 활동중으로 체크해주세요.</HelperText>
+            </div>
+          </ProfileRow>
 
-            <FormField label="지역 2단계">
-              <TextInput
+          <ProfileRow label="상주가능여부">
+            <div>
+              <InlineCheckbox
+                label="가능시 체크"
+                checked={form.onsiteAvailable}
+                onChange={(checked) => updateField('onsiteAvailable', checked)}
+              />
+              <HelperText>이력서 첨부 시 상주 프로젝트 추천에 활용됩니다.</HelperText>
+            </div>
+          </ProfileRow>
+
+          <ProfileRow label="지역 *">
+            <div className="grid gap-3 md:max-w-[520px] md:grid-cols-2">
+              <SelectInput
+                value={form.regionSido}
+                options={regionSidoOptions}
+                placeholder="도/시 선택"
+                onChange={handleRegionSidoChange}
+              />
+              <SelectInput
                 value={form.regionSigungu}
-                placeholder="예: 강남구"
+                options={regionSigunguOptions}
+                placeholder="시/군/구 선택"
                 onChange={(value) => updateField('regionSigungu', value)}
               />
-            </FormField>
+            </div>
+          </ProfileRow>
 
-            <FormField label="사업자 형태">
-              <TextInput
+          <ProfileRow label="형태 *">
+            <div className="grid gap-3 md:max-w-[520px] md:grid-cols-[1fr_140px]">
+              <SelectInput
                 value={form.businessType}
-                placeholder="예: 개인사업자"
+                options={businessOptions}
                 onChange={(value) => updateField('businessType', value)}
               />
-            </FormField>
-
-            <FormField label="경력 연차">
-              <UnitInput
-                value={form.careerYears}
-                unit="년"
-                placeholder="예: 7"
-                onChange={(value) => updateField('careerYears', value)}
+              <SelectInput
+                value={`${form.careerYears}년`}
+                options={CAREER_YEAR_OPTIONS}
+                onChange={(value) => updateField('careerYears', value.replace('년', ''))}
               />
-            </FormField>
-          </div>
+            </div>
+          </ProfileRow>
 
-          <div className="mt-6">
-            <FormField label="검색 태그">
-              <TextInput
-                value={form.searchTags}
-                placeholder="예: Spring Boot, React, Java"
-                onChange={(value) => updateField('searchTags', value)}
-              />
-              <HelperText>쉼표로 구분해서 최대 5개까지 입력할 수 있습니다.</HelperText>
-            </FormField>
-          </div>
+          <ProfileRow label="검색태그">
+            <div className="max-w-[720px]">
+              <div className="rounded-[4px] border border-line bg-page px-3 py-3">
+                <div className="flex flex-wrap gap-2">
+                  {form.searchTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-2 rounded-[4px] border border-[#d8dce2] bg-[#fafafa] px-2.5 py-1.5 text-[13px] text-[#555]"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="text-[12px] font-semibold text-[#999]"
+                      >
+                        x
+                      </button>
+                    </span>
+                  ))}
+                </div>
 
-          <div className="mt-6">
-            <FormField label="소개글">
+                <div className="mt-3 flex flex-col gap-3 md:flex-row">
+                  <input
+                    value={form.tagInput}
+                    placeholder="예: LLM, 웹앱, AI"
+                    onChange={(event) => updateField('tagInput', event.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    className="h-11 w-full rounded-[4px] border border-line px-4 text-[14px] text-ink outline-none placeholder:text-pale"
+                  />
+                  <button
+                    type="button"
+                    onClick={addTagsFromInput}
+                    className="inline-flex h-11 shrink-0 items-center justify-center rounded-[4px] border border-line px-5 text-sm font-semibold text-dim"
+                  >
+                    추가
+                  </button>
+                </div>
+
+                <p className="mt-3 text-[12px] text-pale">
+                  태그는 쉼표로 구분하며, 최대 5개까지 입력하실 수 있습니다.
+                </p>
+              </div>
+              <HelperText>대표하는 기술 및 검색 태그를 반드시 입력해주세요. (검색 노출 유리)</HelperText>
+            </div>
+          </ProfileRow>
+
+          <ProfileRow label="소개글 *">
+            <div className="max-w-[720px]">
               <TextArea
                 value={form.introduction}
-                placeholder="본인의 경험과 강점을 간단히 소개해주세요."
+                placeholder="보유 기술, 주요 경력, 협업 방식 등을 자유롭게 소개해주세요."
                 onChange={(value) => updateField('introduction', value)}
               />
-            </FormField>
-          </div>
+              <HelperText>고객이 키워드 검색을 통해 개발 견적 요청을 보낼 수 있습니다.</HelperText>
+            </div>
+          </ProfileRow>
+        </div>
 
-          {saveState.errorMessage ? (
-            <p className="mt-6 rounded-sm border border-[#ffd4d4] bg-[#fff5f5] px-4 py-3 text-[13px] leading-6 text-[#ba4545]">
-              {saveState.errorMessage}
-            </p>
-          ) : null}
+        {saveState.errorMessage ? <MessageBox tone="error">{saveState.errorMessage}</MessageBox> : null}
+        {saveState.successMessage ? (
+          <MessageBox tone="success">{saveState.successMessage}</MessageBox>
+        ) : null}
 
-          {saveState.successMessage ? (
-            <p className="mt-6 rounded-sm border border-[#caefdb] bg-[#f3fff7] px-4 py-3 text-[13px] leading-6 text-[#247a4d]">
-              {saveState.successMessage}
-            </p>
-          ) : null}
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={saveState.isSaving}
-              className="inline-flex h-12 items-center justify-center rounded-md bg-[#39b9ea] px-6 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saveState.isSaving ? '저장 중...' : '프로필 저장하기'}
-            </button>
-          </div>
-        </form>
-      </section>
-    </section>
+        <div className="mt-10 md:pl-[170px]">
+          <button
+            type="submit"
+            disabled={saveState.isSaving}
+            className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[4px] bg-[#ff8b2b] px-8 text-[15px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saveState.isSaving ? '저장 중...' : '저장하기'}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
 
-function CenteredState({
+function InlineState({
   children,
   tone = 'default',
 }: {
@@ -514,7 +645,7 @@ function CenteredState({
 }) {
   return (
     <div
-      className={`mt-6 rounded-md border border-line bg-page px-6 py-12 text-center text-[14px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] ${
+      className={`px-6 py-12 text-center text-[14px] ${
         tone === 'error' ? 'text-[#ba4545]' : 'text-dim'
       }`}
     >
@@ -523,62 +654,87 @@ function CenteredState({
   )
 }
 
-function FormField({ label, children }: { label: string; children: ReactNode }) {
+function ProfileRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
-      <label className="mb-2 block text-[14px] font-semibold text-ink">{label}</label>
-      {children}
+    <div className="md:flex md:items-start md:gap-8">
+      <div className="mb-3 w-[140px] shrink-0 text-[15px] font-semibold text-[#333] md:mb-0">
+        {label}
+      </div>
+      <div className="flex-1">{children}</div>
     </div>
+  )
+}
+
+function InlineCheckbox({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}) {
+  return (
+    <label className="inline-flex items-center gap-2 text-[15px] text-[#333]">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="h-4 w-4"
+      />
+      {label}
+    </label>
   )
 }
 
 function HelperText({ children }: { children: ReactNode }) {
-  return <p className="mt-2 text-[12px] leading-5 text-pale">{children}</p>
+  return <p className="mt-2 text-[12px] leading-5 text-[#5d83d7]">{children}</p>
 }
 
-function TextInput({
-  value,
-  placeholder,
-  onChange,
+function MessageBox({
+  children,
+  tone,
 }: {
-  value: string
-  placeholder: string
-  onChange: (value: string) => void
+  children: ReactNode
+  tone: 'error' | 'success'
 }) {
   return (
-    <input
-      value={value}
-      placeholder={placeholder}
-      onChange={(event) => onChange(event.target.value)}
-      className="h-11 w-full rounded-sm border border-line bg-page px-4 text-[14px] text-ink outline-none placeholder:text-pale"
-    />
+    <p
+      className={`mt-6 rounded-[4px] border px-4 py-3 text-[13px] leading-6 ${
+        tone === 'error'
+          ? 'border-[#ffd4d4] bg-[#fff5f5] text-[#ba4545]'
+          : 'border-[#caefdb] bg-[#f3fff7] text-[#247a4d]'
+      }`}
+    >
+      {children}
+    </p>
   )
 }
 
-function UnitInput({
+function SelectInput({
   value,
-  unit,
+  options,
   placeholder,
   onChange,
 }: {
   value: string
-  unit: string
-  placeholder: string
+  options: string[]
+  placeholder?: string
   onChange: (value: string) => void
 }) {
   return (
-    <div className="flex h-11 overflow-hidden rounded-sm border border-line bg-page">
-      <input
-        value={value}
-        inputMode="numeric"
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full px-4 text-[14px] text-ink outline-none placeholder:text-pale"
-      />
-      <span className="inline-flex min-w-[56px] items-center justify-center border-l border-line bg-[#fafafa] px-3 text-[13px] text-dim">
-        {unit}
-      </span>
-    </div>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="h-11 w-full rounded-[4px] border border-line bg-page px-4 text-[14px] text-ink outline-none"
+    >
+      {placeholder ? <option value="">{placeholder}</option> : null}
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
   )
 }
 
@@ -596,53 +752,7 @@ function TextArea({
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className="min-h-[180px] w-full rounded-sm border border-line bg-page px-4 py-3 text-[14px] leading-7 text-ink outline-none placeholder:text-pale"
+      className="min-h-[160px] w-full rounded-[4px] border border-line bg-page px-4 py-3 text-[14px] leading-7 text-ink outline-none placeholder:text-pale"
     />
-  )
-}
-
-function ToggleCard({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string
-  checked: boolean
-  onChange: (checked: boolean) => void
-}) {
-  return (
-    <label
-      className={`flex cursor-pointer items-center justify-between rounded-sm border px-4 py-3 text-[14px] ${
-        checked ? 'border-[#39b9ea] bg-[#f3fbff] text-[#2d85b3]' : 'border-line bg-page text-dim'
-      }`}
-    >
-      <span className="font-medium">{label}</span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-    </label>
-  )
-}
-
-function AvailabilityBadge({ label, active }: { label: string; active: boolean }) {
-  return (
-    <div
-      className={`rounded-sm border px-4 py-3 text-center text-[13px] font-semibold ${
-        active ? 'border-[#39b9ea] bg-[#f3fbff] text-[#2d85b3]' : 'border-line bg-[#fafafa] text-pale'
-      }`}
-    >
-      {label}
-    </div>
-  )
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-[12px] text-pale">{label}</span>
-      <span className="text-[13px] font-medium text-ink">{value}</span>
-    </div>
   )
 }

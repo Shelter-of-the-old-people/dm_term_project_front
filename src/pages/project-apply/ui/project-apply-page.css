@@ -150,6 +150,12 @@
   outline: none;
 }
 
+.project-apply-select--readonly {
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
 .project-apply-unit-input {
   display: flex;
   width: 100%;
@@ -184,6 +190,11 @@
   flex-shrink: 0;
 }
 
+.project-apply-unit-input--readonly .project-apply-unit-input__input,
+.project-apply-textarea--readonly {
+  cursor: default;
+}
+
 .project-apply-textarea {
   width: 100%;
   min-height: 238px;
@@ -197,6 +208,10 @@
   resize: vertical;
   outline: none;
   white-space: pre-wrap;
+}
+
+.project-apply-textarea--readonly {
+  resize: none;
 }
 
 .project-apply-textarea--invalid {

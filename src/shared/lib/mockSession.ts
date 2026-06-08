@@ -23,7 +23,6 @@ type ApiResponse<T> = {
 type LoginInput = {
   loginId: string
   password: string
-  role: SessionRole
 }
 
 type SignupInput = {
