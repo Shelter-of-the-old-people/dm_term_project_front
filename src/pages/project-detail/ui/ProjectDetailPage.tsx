@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 
 import { getProjectById } from '@/entities/project'
 import type { ProjectDetail } from '@/entities/project'
+import { isProjectClosed, useSessionUser } from '@/shared/lib'
 import { SiteFooter } from '@/widgets/site-footer'
 import { SiteHeader } from '@/widgets/site-header'
 
@@ -119,6 +120,7 @@ function buildApplyHref(projectId: number) {
 }
 
 export function ProjectDetailPage({ projectId }: { projectId: number }) {
+  const sessionUser = useSessionUser()
   const [state, setState] = useState<ProjectLoadState>({
     isLoading: true,
     errorMessage: null,
@@ -126,6 +128,16 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
   })
 
   useEffect(() => {
+    if (sessionUser === null) {
+      window.location.replace('/m0/s02')
+    }
+  }, [sessionUser])
+
+  useEffect(() => {
+    if (!sessionUser) {
+      return
+    }
+
     let cancelled = false
 
     setState({
@@ -170,7 +182,35 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
     return () => {
       cancelled = true
     }
-  }, [projectId])
+  }, [projectId, sessionUser])
+
+  if (sessionUser === undefined) {
+    return (
+      <PageShell>
+        <AuthStatusCard
+          title="세션을 확인하는 중입니다."
+          description="로그인 상태를 확인한 뒤 프로젝트 상세페이지를 표시합니다."
+        />
+      </PageShell>
+    )
+  }
+
+  if (sessionUser === null) {
+    return null
+  }
+
+  if (!sessionUser) {
+    return (
+      <PageShell>
+        <AuthStatusCard
+          title="로그인이 필요합니다."
+          description="프로젝트 상세페이지는 로그인한 사용자만 확인할 수 있습니다."
+          actionHref="/m0/s02"
+          actionLabel="로그인 페이지로 이동"
+        />
+      </PageShell>
+    )
+  }
 
   if (state.isLoading) {
     return (
@@ -204,6 +244,7 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
 
   const project = state.project
   const projectFieldValue = project.categories.join(',')
+  const projectClosed = isProjectClosed(project.status, project.deadline)
   const visibleSkills = project.skills.filter((skill) => skill.trim().length > 0)
   void formatEmploymentLabel(project.type)
 
@@ -375,9 +416,18 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
           <aside className="project-detail-aside">
             <div className="project-detail-aside__panel">
               <ProfileSetupCard />
-              <a href={buildApplyHref(project.id)} className="project-detail-apply-link">
-                지원하기
-              </a>
+              {projectClosed ? (
+                <>
+                  <button type="button" className="project-detail-apply-link project-detail-apply-link--disabled" disabled>
+                    마감된 프로젝트입니다
+                  </button>
+                  <p className="project-detail-apply-note">마감된 프로젝트는 지원할 수 없습니다.</p>
+                </>
+              ) : (
+                <a href={buildApplyHref(project.id)} className="project-detail-apply-link">
+                  지원하기
+                </a>
+              )}
               <button type="button" className="project-detail-interest-link">
                 <HeartOutlineIcon />
                 관심 프로젝트 지정
@@ -398,6 +448,31 @@ function PageShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main className="mx-auto max-w-[960px] px-5 py-16">{children}</main>
       <SiteFooter />
+    </div>
+  )
+}
+
+function AuthStatusCard({
+  title,
+  description,
+  actionHref = '/m4/s41?page=1',
+  actionLabel = '프로젝트 목록으로 이동',
+}: {
+  title: string
+  description: string
+  actionHref?: string
+  actionLabel?: string
+}) {
+  return (
+    <div className="rounded-md border border-line bg-page p-10 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <h1 className="text-3xl font-bold text-ink">{title}</h1>
+      <p className="mt-3 text-base leading-7 text-dim">{description}</p>
+      <a
+        href={actionHref}
+        className="mt-8 inline-flex h-11 items-center justify-center rounded-md bg-[#39b9ea] px-6 text-sm font-semibold text-white"
+      >
+        {actionLabel}
+      </a>
     </div>
   )
 }

@@ -358,7 +358,7 @@
   width: 100%;
   height: 38px;
   border-radius: 4px;
-  font-size: 0;
+  font-size: 15px;
   line-height: 1;
   transition: box-shadow 0.2s ease-in-out;
 }
@@ -370,6 +370,13 @@
   font-weight: 700;
 }
 
+.project-detail-apply-link--disabled {
+  border-color: #d2d2d2;
+  background: #d2d2d2;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
 .project-detail-interest-link {
   margin-top: 8px;
   border: 1px solid #ffcc73;
@@ -378,20 +385,22 @@
   cursor: pointer;
 }
 
-.project-detail-apply-link::after {
-  content: '프로젝트 지원하기';
-  font-size: 16px;
-}
-
-.project-detail-interest-link::after {
-  content: '관심 프로젝트 지정';
-  font-size: 15px;
+.project-detail-apply-note {
+  margin: 8px 0 0;
+  color: #999999;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .project-detail-apply-link:hover,
 .project-detail-interest-link:hover,
 .project-detail-setup-action:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-detail-apply-link--disabled:hover {
+  box-shadow: none;
 }
 
 .project-detail-interest-link svg {
