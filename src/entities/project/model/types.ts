@@ -31,6 +31,11 @@ export type ProjectDetail = Project & {
   meetingLocation: string
   workDescription: string
   workMethod: string
+  clientDisplayId: string
+  clientRegion: string
+  clientProjectCount: number
+  clientContractCount: number
+  clientTotalContractAmount: number
 }
 
 export type ProjectSort = 'freemoa' | 'latest' | 'highBudget' | 'lowBudget' | 'deadline'

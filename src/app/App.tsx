@@ -3,6 +3,7 @@ import { HomePage } from '@/pages/home'
 import { LoginPage } from '@/pages/login'
 import { MyPagePage } from '@/pages/my-page'
 import { NotFoundPage } from '@/pages/not-found'
+import { ProjectApplyPage } from '@/pages/project-apply'
 import { ProjectDetailPage } from '@/pages/project-detail'
 import { ProjectListPage } from '@/pages/project-list'
 import { SignupPage } from '@/pages/signup'
@@ -41,6 +42,11 @@ export function App() {
 
   if (pathname === '/m4/regProject' || pathname === '/client/projects/new') {
     return <ClientProjectCreatePage />
+  }
+
+  if (pathname === '/m4/s41v/apply') {
+    const projectId = Number(searchParams.get('projectId') ?? searchParams.get('id') ?? '0')
+    return <ProjectApplyPage projectId={projectId} />
   }
 
   if (pathname === '/m4/s41v') {

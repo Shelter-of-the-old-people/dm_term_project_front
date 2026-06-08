@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
-import { createProjectApplication, getProjectById } from '@/entities/project'
-import type { ProjectApplicationInput, ProjectDetail } from '@/entities/project'
-import { containsContactInfo, useSessionUser } from '@/shared/lib'
-import { Badge } from '@/shared/ui'
+import { getProjectById } from '@/entities/project'
+import type { ProjectDetail } from '@/entities/project'
 import { SiteFooter } from '@/widgets/site-footer'
 import { SiteHeader } from '@/widgets/site-header'
+
+import './project-detail-page.css'
 
 type ProjectLoadState = {
   isLoading: boolean
@@ -14,76 +14,115 @@ type ProjectLoadState = {
   project: ProjectDetail | null
 }
 
-type SubmitState = {
-  isSubmitting: boolean
-  errorMessage: string | null
-  successMessage: string | null
-}
+const SUMMARY_TAB_ATTRS = { 'target-div': 'projectViewConMidArticle' } as Record<string, string>
+const WORK_TAB_ATTRS = { 'target-div': 'projectInfoDataDiv' } as Record<string, string>
+const RECRUIT_TAB_ATTRS = { 'target-div': 'recruitMemoDiv' } as Record<string, string>
 
-const RESIDENT_POSITION_OPTIONS = ['개발자', '디자이너', '기획자', '기타']
-const RESIDENT_CAREER_OPTIONS = ['초급 1~5년 미만', '중급 5~10년 미만', '고급 10년 이상']
-
-const INITIAL_OUTSOURCING_FORM = {
-  workDays: '',
-  bidAmount: '',
-  content: '',
-}
-
-const INITIAL_RESIDENT_FORM = {
-  position: '',
-  careerLevel: '',
-  headcount: '',
-  monthlyWage: '',
-  content: '',
-}
+const PROFILE_ACTIONS = ['가입정보 등록', '기술정보 등록', '경력정보 등록', '포트폴리오 등록하기']
 
 function formatProjectType(type: ProjectDetail['type']) {
-  return type === 'budget' ? '도급' : '기간제 상주'
+  return type === 'budget' ? '도급' : '상주'
+}
+
+function formatTypeClass(type: ProjectDetail['type']) {
+  return type === 'budget' ? 'b' : 'r'
+}
+
+function formatStatusLabel(status: ProjectDetail['status']) {
+  return status === '마감' ? '마감' : '모집중'
+}
+
+function formatStatusClass(status: ProjectDetail['status']) {
+  return status === '마감' ? 'c' : 'e'
+}
+
+function formatEmploymentLabel(type: ProjectDetail['type']) {
+  return type === 'budget' ? '도급외주' : '상주(기간제)'
+}
+
+function formatWorkTypeValue(type: ProjectDetail['type']) {
+  return type === 'budget' ? '1' : '3'
 }
 
 function formatBudgetLabel(project: ProjectDetail) {
-  if (project.type === 'budget') {
-    return '예상 비용'
-  }
-
-  return '월 임금'
+  return project.type === 'budget' ? '예상비용' : '월임금'
 }
 
 function formatProjectBudget(project: ProjectDetail) {
   if (project.type === 'budget') {
     if (project.quoteLow === project.quoteHigh) {
-      return `${project.quoteHigh.toLocaleString()}만원`
+      return `${project.quoteHigh.toLocaleString()} 만원`
     }
 
-    return `${project.quoteLow.toLocaleString()} ~ ${project.quoteHigh.toLocaleString()}만원`
+    return `${project.quoteLow.toLocaleString()} ~ ${project.quoteHigh.toLocaleString()} 만원`
   }
 
-  return `${project.averageEstimate.toLocaleString()}만원`
+  return `${project.averageEstimate.toLocaleString()} 만원`
 }
 
-function parsePositiveInteger(value: string) {
-  const parsed = Number(value)
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    return null
+function formatTopDeadlineLabel(label: string) {
+  if (!label) {
+    return ''
   }
 
-  return parsed
+  return label.endsWith('일') ? label : `${label}일`
+}
+
+function formatDeadlineValue(project: ProjectDetail) {
+  return [project.deadline, formatTopDeadlineLabel(project.deadlineLabel)].filter(Boolean).join(' ')
+}
+
+function formatPostedAtDisplay(date: string) {
+  return date.replace(/-/g, '.')
+}
+
+function normalizeText(value: string) {
+  return value.replace(/\r\n/g, '\n').trim()
+}
+
+function hasVisibleSkills(project: ProjectDetail) {
+  return project.skills.some((skill) => skill.trim().length > 0)
+}
+
+function buildWorkContent(project: ProjectDetail) {
+  const workMethod = normalizeText(project.workMethod)
+  const description = normalizeText(project.workDescription)
+  const summary = normalizeText(project.summary)
+
+  if (description.includes('※ 프로젝트 진행 방식') || description.includes('────────────────────────')) {
+    return description
+  }
+
+  const sections: string[] = []
+
+  if (description) {
+    sections.push(description)
+  }
+
+  if (workMethod) {
+    sections.push(`※ 프로젝트 진행 방식\n\n${workMethod}`)
+  }
+
+  if (summary && !description.includes(summary)) {
+    sections.push(`※ 프로젝트 개요\n\n${summary}`)
+  }
+
+  return sections.join('\n\n────────────────────────\n\n') || '상세 업무 내용이 아직 등록되지 않았습니다.'
+}
+
+function formatContractAmount(amount: number) {
+  return `${amount.toLocaleString()}원`
+}
+
+function buildApplyHref(projectId: number) {
+  return `/m4/s41v/apply?projectId=${projectId}`
 }
 
 export function ProjectDetailPage({ projectId }: { projectId: number }) {
-  const sessionUser = useSessionUser()
   const [state, setState] = useState<ProjectLoadState>({
     isLoading: true,
     errorMessage: null,
     project: null,
-  })
-  const [outsourcingForm, setOutsourcingForm] = useState(INITIAL_OUTSOURCING_FORM)
-  const [residentForm, setResidentForm] = useState(INITIAL_RESIDENT_FORM)
-  const [submitState, setSubmitState] = useState<SubmitState>({
-    isSubmitting: false,
-    errorMessage: null,
-    successMessage: null,
   })
 
   useEffect(() => {
@@ -98,6 +137,15 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
     void getProjectById(projectId)
       .then((project) => {
         if (cancelled) {
+          return
+        }
+
+        if (!project) {
+          setState({
+            isLoading: false,
+            errorMessage: null,
+            project: null,
+          })
           return
         }
 
@@ -124,147 +172,12 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
     }
   }, [projectId])
 
-  function resetSubmitMessage() {
-    setSubmitState((current) => ({
-      ...current,
-      errorMessage: null,
-      successMessage: null,
-    }))
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const project = state.project
-    if (!project) {
-      return
-    }
-
-    if (!sessionUser) {
-      setSubmitState({
-        isSubmitting: false,
-        errorMessage: '로그인 후에만 지원할 수 있습니다.',
-        successMessage: null,
-      })
-      return
-    }
-
-    if (sessionUser.role !== 'developer') {
-      setSubmitState({
-        isSubmitting: false,
-        errorMessage: '개발자 계정만 프로젝트 지원이 가능합니다.',
-        successMessage: null,
-      })
-      return
-    }
-
-    let payload: ProjectApplicationInput | null = null
-
-    if (project.type === 'budget') {
-      const workDays = parsePositiveInteger(outsourcingForm.workDays)
-      const bidAmount = parsePositiveInteger(outsourcingForm.bidAmount)
-      const content = outsourcingForm.content.trim()
-
-      if (!workDays || !bidAmount || !content) {
-        setSubmitState({
-          isSubmitting: false,
-          errorMessage: '작업기간, 지원 금액, 지원 내용을 모두 입력해주세요.',
-          successMessage: null,
-        })
-        return
-      }
-
-      if (containsContactInfo(content)) {
-        setSubmitState({
-          isSubmitting: false,
-          errorMessage: '지원 내용에는 이메일 또는 전화번호를 입력할 수 없습니다.',
-          successMessage: null,
-        })
-        return
-      }
-
-      payload = {
-        employmentType: 'outsourcing',
-        workDays,
-        bidAmount,
-        content,
-      }
-    } else {
-      const position = residentForm.position.trim()
-      const careerLevel = residentForm.careerLevel.trim()
-      const headcount = parsePositiveInteger(residentForm.headcount)
-      const monthlyWage = parsePositiveInteger(residentForm.monthlyWage)
-      const content = residentForm.content.trim()
-
-      if (!position || !careerLevel || !headcount || !monthlyWage || !content) {
-        setSubmitState({
-          isSubmitting: false,
-          errorMessage: '기술구분, 연차구분, 인원수, 임금, 지원 내용을 모두 입력해주세요.',
-          successMessage: null,
-        })
-        return
-      }
-
-      if (containsContactInfo(content)) {
-        setSubmitState({
-          isSubmitting: false,
-          errorMessage: '지원 내용에는 이메일 또는 전화번호를 입력할 수 없습니다.',
-          successMessage: null,
-        })
-        return
-      }
-
-      payload = {
-        employmentType: 'resident',
-        position,
-        careerLevel,
-        headcount,
-        monthlyWage,
-        content,
-      }
-    }
-
-    setSubmitState({
-      isSubmitting: true,
-      errorMessage: null,
-      successMessage: null,
-    })
-
-    try {
-      const result = await createProjectApplication(project.id, payload)
-
-      setState((current) => ({
-        ...current,
-        project: current.project
-          ? {
-              ...current.project,
-              applicants: result.applicationCount,
-            }
-          : current.project,
-      }))
-      setOutsourcingForm(INITIAL_OUTSOURCING_FORM)
-      setResidentForm(INITIAL_RESIDENT_FORM)
-      setSubmitState({
-        isSubmitting: false,
-        errorMessage: null,
-        successMessage: `지원이 접수되었습니다. 현재 지원자 수는 ${result.applicationCount}명입니다.`,
-      })
-    } catch (error) {
-      setSubmitState({
-        isSubmitting: false,
-        errorMessage:
-          error instanceof Error ? error.message : '지원 접수 중 문제가 발생했습니다. 다시 시도해주세요.',
-        successMessage: null,
-      })
-    }
-  }
-
   if (state.isLoading) {
     return (
       <PageShell>
         <StatusCard
           title="프로젝트 정보를 불러오는 중입니다."
-          description="요약 화면과 지원 폼을 준비하고 있습니다."
+          description="상세 화면과 우측 패널 구성을 준비하고 있습니다."
         />
       </PageShell>
     )
@@ -290,260 +203,187 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
   }
 
   const project = state.project
-  const statusTone = project.status === '마감' ? 'gray' : 'blue'
+  const projectFieldValue = project.categories.join(',')
+  const visibleSkills = project.skills.filter((skill) => skill.trim().length > 0)
+  void formatEmploymentLabel(project.type)
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
+    <div className="project-detail-page">
       <SiteHeader />
-      <main className="mx-auto max-w-[1180px] px-5 py-8">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <a href="/m4/s41?page=1" className="text-[14px] font-medium text-[#3d92d1] hover:underline">
-            프로젝트 목록으로 돌아가기
-          </a>
-          <a
-            href={sessionUser ? '#application-panel' : '/m0/s02'}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-[#39b9ea] px-4 text-sm font-semibold text-white"
-          >
-            {sessionUser ? '지원하기' : '로그인 후 지원하기'}
-          </a>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-5">
-            <section className="rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-              <div className="border-b border-line px-6 py-4">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <Badge tone="orange">{formatProjectType(project.type)}</Badge>
-                  <Badge tone={statusTone}>{project.status}</Badge>
-                  <span className="text-[13px] text-pale">등록일 {project.postedAt}</span>
+      <main className="project-detail-page__main">
+        <div className="project-detail-page__layout">
+          <div className="projectViewCon">
+            <div className="projectViewConTop">
+              <div>
+                <div className="projectAttr">
+                  <p className={formatTypeClass(project.type)}>{formatProjectType(project.type)}</p>
+                  <p className={formatStatusClass(project.status)}>{formatStatusLabel(project.status)}</p>
                 </div>
-                <h1 className="mt-4 text-[28px] font-bold leading-[1.35] text-ink">{project.title}</h1>
-                <p className="mt-3 text-[15px] leading-7 text-dim">{project.summary}</p>
-              </div>
-
-              <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
-                <SummaryMetric label={formatBudgetLabel(project)} value={formatProjectBudget(project)} />
-                <SummaryMetric label="예상 기간" value={`${project.averagePeriodDays}일`} />
-                <SummaryMetric label="지원자 수" value={`${project.applicants}명`} />
-                <SummaryMetric label="마감 일정" value={project.deadlineLabel} />
-              </div>
-            </section>
-
-            <section className="rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-              <div className="border-b border-line px-6 py-4">
-                <div className="flex items-center gap-5 text-sm font-semibold text-ink">
-                  <span className="border-b-2 border-[#39b9ea] pb-3 text-[#39b9ea]">요약</span>
+                <div>
+                  <b>
+                    등록일 : <span className="projectInfoDate">{formatPostedAtDisplay(project.postedAt)}</span>
+                  </b>
                 </div>
               </div>
 
-              <div className="px-6 py-6">
-                <SectionTitle>프로젝트 요약</SectionTitle>
-                <InfoTable
-                  rows={[
-                    ['모집 마감일', project.deadline],
-                    ['예상 킥오프 일정', project.kickoffSchedule],
-                    ['고용형태', formatProjectType(project.type)],
-                    ['프로젝트 분야', project.categories.join(', ')],
-                    ['진행 분류', project.progressType],
-                    ['기획 상태', project.planningStatus],
-                    ['미팅 희망 지역', project.meetingLocation],
-                  ]}
-                />
+              <p className="projectInfoData" data-name="title">
+                {project.title}
+              </p>
 
-                <SectionTitle className="mt-8">관련 기술</SectionTitle>
-                <div className="flex flex-wrap gap-2">
-                  {project.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-sm border border-[#d8dde4] bg-[#fafbfd] px-3 py-1 text-[13px] text-dim"
-                    >
-                      {skill}
-                    </span>
+              <ul>
+                <li>
+                  <span className="projectCostDataKey">{formatBudgetLabel(project)}</span>
+                  <b className="projectCostData" data-name="costView">
+                    {formatProjectBudget(project)}
+                  </b>
+                </li>
+                <li>
+                  <span>예상기간</span>
+                  <b className="projectInfoData" data-name="during">
+                    {project.averagePeriodDays}
+                  </b>
+                  <b>일</b>
+                </li>
+                <li>
+                  <span>지원자수</span>
+                  <b className="bg projectInfoData" data-name="ALL_APPLY_COUNT">
+                    {project.applicants}
+                  </b>
+                </li>
+                <li>
+                  <span>마감일정</span>
+                  <b className="dday_view">{formatTopDeadlineLabel(project.deadlineLabel)}</b>
+                </li>
+              </ul>
+
+              {hasVisibleSkills(project) ? (
+                <article className="prj-need-tech-new">
+                  <span>관련기술</span>
+                  {visibleSkills.map((skill) => (
+                    <p key={skill}>{skill}</p>
                   ))}
+                </article>
+              ) : null}
+
+              <section className="projectViewMidMenu">
+                <p className="projectViewMidMenuItem selected" {...SUMMARY_TAB_ATTRS}>
+                  요약
+                </p>
+                <p className="projectViewMidMenuItem" {...WORK_TAB_ATTRS}>
+                  업무내용
+                </p>
+                <p
+                  className="projectViewMidMenuItem"
+                  id="projectViewMidMenuRecruitMemo"
+                  style={{ display: 'none' }}
+                  {...RECRUIT_TAB_ATTRS}
+                >
+                  모집요건
+                </p>
+              </section>
+            </div>
+
+            <div className="projectViewConMid">
+              <article id="projectViewConMidArticle">
+                <div>
+                  <h3>요약</h3>
+                  <article>
+                    <ProjectSummaryRow label="모집 마감일">
+                      <b className="enddate_custom">{formatDeadlineValue(project)}</b>
+                    </ProjectSummaryRow>
+                    <ProjectSummaryRow label="예상 킥오프 일정">
+                      <b className="projectInfoData" data-name="BEGIN_EXPECT">
+                        {project.kickoffSchedule}
+                      </b>
+                    </ProjectSummaryRow>
+                    <p>
+                      <input type="hidden" id="projectWorkType" value={formatWorkTypeValue(project.type)} readOnly />
+                      <span>고용형태</span>
+                      <b className="item02 workType01" style={{ display: project.type === 'budget' ? undefined : 'none' }}>
+                        도급외주
+                      </b>
+                      <b className="item02 workType02" style={{ display: 'none' }}>
+                        상주(시간제)
+                      </b>
+                      <b className="item02 workType03" style={{ display: project.type === 'resident' ? undefined : 'none' }}>
+                        상주(기간제)
+                      </b>
+                      <b className="item02 workType04" style={{ display: 'none' }}>
+                        상주
+                      </b>
+                    </p>
+                    <ProjectSummaryRow label="프로젝트 분야">
+                      <b className="projectInfoData" data-name="proj_filed_new">
+                        {projectFieldValue}
+                      </b>
+                    </ProjectSummaryRow>
+                    <ProjectSummaryRow label="진행 분류">
+                      <b className="projectType">{project.progressType}</b>
+                    </ProjectSummaryRow>
+                    <ProjectSummaryRow label="기획 상태">
+                      <b className="projectInfoData" data-name="plan_nm">
+                        {project.planningStatus}
+                      </b>
+                    </ProjectSummaryRow>
+                    <ProjectSummaryRow label="미팅 희망 지역">
+                      <b className="projectInfoData" data-name="pvNmu">
+                        {project.meetingLocation}
+                      </b>
+                    </ProjectSummaryRow>
+                  </article>
                 </div>
 
-                <SectionTitle className="mt-8">업무 내용</SectionTitle>
-                <div className="rounded-sm border border-line bg-[#fafafa] px-5 py-4 text-[14px] leading-7 text-dim">
-                  {project.workDescription}
-                </div>
+                <section className="projectViewApplyHidenContens">
+                  <div id="projectInfoDataDiv">
+                    <h3>업무내용</h3>
+                    <pre className="projectInfoData" data-name="txt" id="projectInfoDataDetail">
+                      {buildWorkContent(project)}
+                    </pre>
+                  </div>
 
-                <SectionTitle className="mt-8">프로젝트 진행 방식</SectionTitle>
-                <div className="rounded-sm border border-line bg-[#fafafa] px-5 py-4 text-[14px] leading-7 text-dim">
-                  {project.workMethod}
-                </div>
-              </div>
-            </section>
+                  <div className="stayProjectDiv" style={{ display: 'none' }}>
+                    <div>
+                      <p className="tit">상주 프로젝트 추천을 받아보시겠어요?</p>
+                      <p className="sub">조건에 맞는 다음 프로젝트를 추천받을 수 있도록 준비된 영역입니다.</p>
+                    </div>
+                    <div className="stayProjectPlaceholder" aria-hidden="true" />
+                    <div>
+                      <button type="button" className="stayCheckClass modalBtn_new">
+                        추천받기
+                      </button>
+                    </div>
+                  </div>
+
+                  <div id="recruitMemoDiv" style={{ display: 'none' }}>
+                    <h3>모집요건</h3>
+                    <pre className="recruitMemo"></pre>
+                  </div>
+
+                  <div id="projectAddFilesDiv" style={{ display: 'none' }}>
+                    <h3>참고자료</h3>
+                    <div className="projectAddFilesNone">
+                      <div>첨부된 참고자료가 없습니다.</div>
+                    </div>
+                    <div className="projectAddFilesShow"></div>
+                  </div>
+
+                </section>
+              </article>
+            </div>
           </div>
 
-          <aside id="application-panel" className="space-y-5">
-            <section className="rounded-md border border-line bg-page shadow-[0_1px_4px_rgba(0,0,0,0.06)] lg:sticky lg:top-6">
-              <div className="border-b border-line px-5 py-4">
-                <h2 className="text-[18px] font-bold text-ink">프로젝트 지원하기</h2>
-                <p className="mt-2 text-[13px] leading-6 text-dim">
-                  요약 내용을 확인한 뒤 도급 또는 상주 형태에 맞게 지원서를 작성해주세요.
-                </p>
-              </div>
-
-              <div className="border-b border-line bg-[#fafafa] px-5 py-4">
-                <p className="text-[13px] leading-6 text-dim">
-                  지원 내용에는 이메일, 전화번호 등 직접 연락 가능한 정보를 입력할 수 없습니다.
-                </p>
-              </div>
-
-              {sessionUser === undefined ? (
-                <SideNotice
-                  title="세션을 확인하는 중입니다."
-                  description="로그인 정보를 불러온 뒤 지원 폼을 표시합니다."
-                />
-              ) : !sessionUser ? (
-                <SideNotice
-                  title="로그인이 필요합니다."
-                  description="개발자 계정으로 로그인한 뒤 프로젝트를 지원할 수 있습니다."
-                  actionHref="/m0/s02"
-                  actionLabel="로그인 페이지로 이동"
-                />
-              ) : sessionUser.role !== 'developer' ? (
-                <SideNotice
-                  title="개발자 계정 전용 기능입니다."
-                  description="의뢰인 계정에서는 프로젝트 지원이 불가능합니다."
-                />
-              ) : (
-                <form className="px-5 py-5" onSubmit={(event) => void handleSubmit(event)}>
-                  <SummaryMiniCard project={project} />
-
-                  {project.type === 'budget' ? (
-                    <div className="mt-5 space-y-5">
-                      <FormField label="작업기간">
-                        <UnitInput
-                          value={outsourcingForm.workDays}
-                          unit="일"
-                          placeholder="실제 진행 가능한 기간"
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setOutsourcingForm((current) => ({ ...current, workDays: value }))
-                          }}
-                        />
-                      </FormField>
-
-                      <FormField label="지원 금액">
-                        <UnitInput
-                          value={outsourcingForm.bidAmount}
-                          unit="만원"
-                          placeholder="프리모아 이용료 포함 금액"
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setOutsourcingForm((current) => ({ ...current, bidAmount: value }))
-                          }}
-                        />
-                        <HelperText>만원 단위로 입력하며, 이용료 10%를 포함한 금액입니다.</HelperText>
-                      </FormField>
-
-                      <FormField label="지원 내용">
-                        <TextArea
-                          value={outsourcingForm.content}
-                          placeholder="프로젝트 이해도, 진행 계획, 강점을 작성해주세요."
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setOutsourcingForm((current) => ({ ...current, content: value }))
-                          }}
-                        />
-                      </FormField>
-                    </div>
-                  ) : (
-                    <div className="mt-5 space-y-5">
-                      <FormField label="기술구분">
-                        <SelectInput
-                          value={residentForm.position}
-                          placeholder="기술구분을 선택해주세요."
-                          options={RESIDENT_POSITION_OPTIONS}
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setResidentForm((current) => ({ ...current, position: value }))
-                          }}
-                        />
-                      </FormField>
-
-                      <FormField label="연차구분">
-                        <SelectInput
-                          value={residentForm.careerLevel}
-                          placeholder="연차구분을 선택해주세요."
-                          options={RESIDENT_CAREER_OPTIONS}
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setResidentForm((current) => ({ ...current, careerLevel: value }))
-                          }}
-                        />
-                      </FormField>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField label="인원수">
-                          <UnitInput
-                            value={residentForm.headcount}
-                            unit="명"
-                            placeholder="인원수"
-                            onChange={(value) => {
-                              resetSubmitMessage()
-                              setResidentForm((current) => ({ ...current, headcount: value }))
-                            }}
-                          />
-                        </FormField>
-
-                        <FormField label="임금">
-                          <UnitInput
-                            value={residentForm.monthlyWage}
-                            unit="만원"
-                            placeholder="월 임금"
-                            onChange={(value) => {
-                              resetSubmitMessage()
-                              setResidentForm((current) => ({ ...current, monthlyWage: value }))
-                            }}
-                          />
-                        </FormField>
-                      </div>
-
-                      <FormField label="지원 내용">
-                        <TextArea
-                          value={residentForm.content}
-                          placeholder="투입 가능 시점, 수행 경험, 강점을 작성해주세요."
-                          onChange={(value) => {
-                            resetSubmitMessage()
-                            setResidentForm((current) => ({ ...current, content: value }))
-                          }}
-                        />
-                      </FormField>
-                    </div>
-                  )}
-
-                  {submitState.errorMessage ? (
-                    <p className="mt-5 rounded-sm border border-[#ffd4d4] bg-[#fff5f5] px-4 py-3 text-[13px] leading-6 text-[#ba4545]">
-                      {submitState.errorMessage}
-                    </p>
-                  ) : null}
-
-                  {submitState.successMessage ? (
-                    <p className="mt-5 rounded-sm border border-[#caefdb] bg-[#f3fff7] px-4 py-3 text-[13px] leading-6 text-[#247a4d]">
-                      {submitState.successMessage}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-6 flex gap-3">
-                    <a
-                      href="/m4/s41?page=1"
-                      className="inline-flex h-11 flex-1 items-center justify-center rounded-md border border-line bg-page text-sm font-semibold text-dim"
-                    >
-                      돌아가기
-                    </a>
-                    <button
-                      type="submit"
-                      disabled={submitState.isSubmitting}
-                      className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-[#39b9ea] text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {submitState.isSubmitting ? '제출 중...' : '지원 완료하기'}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </section>
+          <aside className="project-detail-aside">
+            <div className="project-detail-aside__panel">
+              <ProfileSetupCard />
+              <a href={buildApplyHref(project.id)} className="project-detail-apply-link">
+                지원하기
+              </a>
+              <button type="button" className="project-detail-interest-link">
+                <HeartOutlineIcon />
+                관심 프로젝트 지정
+              </button>
+              <ClientInfoCard project={project} />
+            </div>
           </aside>
         </div>
       </main>
@@ -554,7 +394,7 @@ export function ProjectDetailPage({ projectId }: { projectId: number }) {
 
 function PageShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
+    <div className="min-h-screen bg-white">
       <SiteHeader />
       <main className="mx-auto max-w-[960px] px-5 py-16">{children}</main>
       <SiteFooter />
@@ -577,185 +417,88 @@ function StatusCard({ title, description }: { title: string; description: string
   )
 }
 
-function SummaryMetric({ label, value }: { label: string; value: string }) {
+function ProjectSummaryRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="border-t border-line px-6 py-5 sm:border-r sm:last:border-r-0 lg:border-t-0">
-      <p className="text-[13px] text-pale">{label}</p>
-      <p className="mt-2 text-[18px] font-semibold text-ink">{value}</p>
-    </div>
-  )
-}
-
-function SectionTitle({
-  children,
-  className = '',
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  return <h2 className={`mb-4 text-[18px] font-semibold text-ink ${className}`}>{children}</h2>
-}
-
-function InfoTable({ rows }: { rows: [string, string][] }) {
-  return (
-    <div className="overflow-hidden rounded-sm border border-line">
-      {rows.map(([label, value], index) => (
-        <div
-          key={`${label}-${value}`}
-          className={`grid gap-2 px-4 py-4 text-[14px] sm:grid-cols-[160px_minmax(0,1fr)] ${
-            index > 0 ? 'border-t border-line' : ''
-          }`}
-        >
-          <p className="font-medium text-pale">{label}</p>
-          <p className="leading-7 text-dim">{value}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function SummaryMiniCard({ project }: { project: ProjectDetail }) {
-  return (
-    <div className="rounded-sm border border-line bg-[#fafafa] px-4 py-4">
-      <p className="text-[13px] text-pale">요약</p>
-      <div className="mt-3 space-y-2 text-[13px] leading-6 text-dim">
-        <p>
-          <span className="font-medium text-ink">모집 마감일</span> {project.deadline}
-        </p>
-        <p>
-          <span className="font-medium text-ink">예상 킥오프</span> {project.kickoffSchedule}
-        </p>
-        <p>
-          <span className="font-medium text-ink">고용형태</span> {formatProjectType(project.type)}
-        </p>
-        <p>
-          <span className="font-medium text-ink">프로젝트 분야</span> {project.categories.join(', ')}
-        </p>
-        <p>
-          <span className="font-medium text-ink">진행 분류</span> {project.progressType}
-        </p>
-        <p>
-          <span className="font-medium text-ink">기획 상태</span> {project.planningStatus}
-        </p>
-        <p>
-          <span className="font-medium text-ink">미팅 희망 지역</span> {project.meetingLocation}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function SideNotice({
-  title,
-  description,
-  actionHref,
-  actionLabel,
-}: {
-  title: string
-  description: string
-  actionHref?: string
-  actionLabel?: string
-}) {
-  return (
-    <div className="px-5 py-5">
-      <div className="rounded-sm border border-line bg-[#fafafa] px-4 py-4">
-        <h3 className="text-[16px] font-semibold text-ink">{title}</h3>
-        <p className="mt-2 text-[13px] leading-6 text-dim">{description}</p>
-        {actionHref && actionLabel ? (
-          <a
-            href={actionHref}
-            className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-[#39b9ea] px-4 text-sm font-semibold text-white"
-          >
-            {actionLabel}
-          </a>
-        ) : null}
-      </div>
-    </div>
-  )
-}
-
-function FormField({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div>
-      <label className="mb-2 block text-[14px] font-semibold text-ink">{label}</label>
+    <p>
+      <span>{label}</span>
       {children}
-    </div>
+    </p>
   )
 }
 
-function HelperText({ children }: { children: ReactNode }) {
-  return <p className="mt-2 text-[12px] leading-5 text-pale">{children}</p>
+function ProfileSetupCard() {
+  return (
+    <section className="project-detail-setup-card">
+      <p className="project-detail-setup-card__title">프로필 정보 등록하기</p>
+      <p className="project-detail-setup-card__description">
+        프로젝트 지원을 위하여 아래 항목들을 입력해주세요.
+      </p>
+
+      <div className="project-detail-setup-card__actions">
+        {PROFILE_ACTIONS.map((label) => (
+          <button key={label} type="button" className="project-detail-setup-action">
+            <span className="project-detail-setup-action__icon">+</span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      <button type="button" className="project-detail-setup-submit" disabled>
+        정보 등록 후 지원 가능
+      </button>
+    </section>
+  )
 }
 
-function UnitInput({
-  value,
-  unit,
-  placeholder,
-  onChange,
-}: {
-  value: string
-  unit: string
-  placeholder: string
-  onChange: (value: string) => void
-}) {
+function ClientInfoCard({ project }: { project: ProjectDetail }) {
+  const displayId =
+    typeof project.clientDisplayId === 'string' && project.clientDisplayId.trim().length > 0
+      ? project.clientDisplayId.trim()
+      : 'cli***'
+  const region =
+    typeof project.clientRegion === 'string' && project.clientRegion.trim().length > 0
+      ? project.clientRegion.trim()
+      : project.meetingLocation
+
   return (
-    <div className="flex h-11 overflow-hidden rounded-sm border border-line bg-page">
-      <input
-        value={value}
-        inputMode="numeric"
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full px-4 text-[14px] text-ink outline-none placeholder:text-pale"
+    <section className="project-detail-client-card">
+      <p className="project-detail-client-card__title">클라이언트 정보</p>
+
+      <div className="project-detail-client-card__profile">
+        <div className="project-detail-client-card__avatar">{displayId.charAt(0).toUpperCase()}</div>
+        <div className="project-detail-client-card__meta">
+          <p className="project-detail-client-card__name">{displayId}</p>
+          <p className="project-detail-client-card__region">{region}</p>
+          <p className="project-detail-client-card__verified">연락처 인증</p>
+        </div>
+      </div>
+
+      <ul className="project-detail-client-card__stats">
+        <ClientInfoItem label="등록 프로젝트" value={`${project.clientProjectCount}건`} />
+        <ClientInfoItem label="계약" value={`${project.clientContractCount}건`} />
+        <ClientInfoItem label="누적 계약 금액" value={formatContractAmount(project.clientTotalContractAmount)} />
+      </ul>
+    </section>
+  )
+}
+
+function ClientInfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <li>
+      <span>{label}</span>
+      <b>{value}</b>
+    </li>
+  )
+}
+
+function HeartOutlineIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M10 16.5C9.75 16.5 9.51 16.41 9.32 16.24C8.49 15.5 7.71 14.83 7.04 14.25C5.05 12.53 3.86 11.5 3.02 10.52C2.07 9.43 1.5 8.37 1.5 7C1.5 4.51 3.42 2.5 5.85 2.5C7.23 2.5 8.54 3.16 9.38 4.19L10 4.95L10.62 4.19C11.46 3.16 12.77 2.5 14.15 2.5C16.58 2.5 18.5 4.51 18.5 7C18.5 8.37 17.93 9.43 16.98 10.52C16.14 11.5 14.95 12.53 12.96 14.25C12.29 14.83 11.51 15.5 10.68 16.24C10.49 16.41 10.25 16.5 10 16.5Z"
+        stroke="currentColor"
+        strokeWidth="1.3"
       />
-      <span className="inline-flex min-w-[56px] items-center justify-center border-l border-line bg-[#fafafa] px-3 text-[13px] text-dim">
-        {unit}
-      </span>
-    </div>
-  )
-}
-
-function SelectInput({
-  value,
-  placeholder,
-  options,
-  onChange,
-}: {
-  value: string
-  placeholder: string
-  options: string[]
-  onChange: (value: string) => void
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className="h-11 w-full rounded-sm border border-line bg-page px-4 text-[14px] text-ink outline-none"
-    >
-      <option value="">{placeholder}</option>
-      {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
-  )
-}
-
-function TextArea({
-  value,
-  placeholder,
-  onChange,
-}: {
-  value: string
-  placeholder: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <textarea
-      value={value}
-      placeholder={placeholder}
-      onChange={(event) => onChange(event.target.value)}
-      className="min-h-[180px] w-full rounded-sm border border-line bg-page px-4 py-3 text-[14px] leading-7 text-ink outline-none placeholder:text-pale"
-    />
+    </svg>
   )
 }

@@ -54,6 +54,11 @@ type BackendProjectDetail = BackendProject & {
   meetingLocation: string
   workDescription: string
   workMethod: string
+  clientDisplayId: string
+  clientRegion: string
+  clientProjectCount: number
+  clientContractCount: number
+  clientTotalContractAmount: number
 }
 
 type BackendProjectPage = {
@@ -268,6 +273,11 @@ function mapProjectDetail(project: BackendProjectDetail): ProjectDetail {
     meetingLocation: project.meetingLocation,
     workDescription: project.workDescription,
     workMethod: project.workMethod,
+    clientDisplayId: project.clientDisplayId ?? 'cli***',
+    clientRegion: project.clientRegion ?? project.meetingLocation,
+    clientProjectCount: project.clientProjectCount ?? 0,
+    clientContractCount: project.clientContractCount ?? 0,
+    clientTotalContractAmount: project.clientTotalContractAmount ?? 0,
   }
 }
 
